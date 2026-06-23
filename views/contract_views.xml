@@ -1,0 +1,67 @@
+<odoo>
+
+    <record id="view_xalaeco_contract_tree" model="ir.ui.view">
+        <field name="name">xalaeco.contract.tree</field>
+        <field name="model">xalaeco.contract</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="service_type"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="waste_volume"/>
+                <field name="service_fee"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xalaeco_contract_form" model="ir.ui.view">
+        <field name="name">xalaeco.contract.form</field>
+        <field name="model">xalaeco.contract</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+
+                    <group string="Thông tin hợp đồng">
+                        <field name="name"/>
+                        <field name="customer_id"/>
+                        <field name="service_type"/>
+                        <field name="sign_date"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                        <field name="billing_cycle"/>
+                        <field name="pricing_area"/>
+                        <field name="waste_volume"/>
+                        <field name="service_fee"/>
+                        <field name="state"/>
+                        <field name="is_near_expired"/>
+                    </group>
+
+                    <group string="Hồ sơ hợp đồng">
+                        <field name="attachment"
+                               filename="attachment_name"/>
+                        <field name="attachment_name"/>
+                        <field name="legal_note"/>
+                    </group>
+
+                    <group string="Thông tin xuất hóa đơn">
+                    <field name="invoice_required"/>
+                    <field name="tax_code"/>
+                    <field name="invoice_name"/>
+                    <field name="invoice_address"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xalaeco_contract" model="ir.actions.act_window">
+        <field name="name">Hợp đồng</field>
+        <field name="res_model">xalaeco.contract</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

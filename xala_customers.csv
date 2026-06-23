@@ -1,0 +1,6 @@
+customer_code,name,phone,address,area,customer_type,monthly_fee,state
+KH001,Nguyễn Văn A,0901234567,Phường Bình Hưng Hòa,Tuyến 1,household,80000,active
+KH002,Quán Ăn Minh Anh,0908888888,Tân Phú,Tuyến 2,restaurant,250000,active
+KH003,Cửa hàng Tạp hóa Cô Ba,0912345678,Bình Tân,Tuyến 1,business,120000,active
+KH004,Văn phòng An Phát,0987654321,Tân Bình,Tuyến 3,office,200000,active
+KH005,Trần Thị B,0933333333,Gò Vấp,Tuyến 2,household,80000,paused

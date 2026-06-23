@@ -1,0 +1,5 @@
+<odoo>
+    <record id="xalaeco_dashboard_main" model="xalaeco.dashboard">
+        <field name="name">Tổng quan XALA ECO</field>
+    </record>
+</odoo>

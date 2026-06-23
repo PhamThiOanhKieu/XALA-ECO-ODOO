@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xalaeco_customer,xalaeco.customer,model_xalaeco_customer,base.group_user,1,1,1,1
+access_xalaeco_contract,xalaeco.contract,model_xalaeco_contract,base.group_user,1,1,1,1
+access_xalaeco_billing,xalaeco.billing,model_xalaeco_billing,base.group_user,1,1,1,1
+access_xalaeco_payment,xalaeco.payment,model_xalaeco_payment,base.group_user,1,1,1,1
+access_xalaeco_dashboard,xalaeco.dashboard,model_xalaeco_dashboard,base.group_user,1,1,1,1

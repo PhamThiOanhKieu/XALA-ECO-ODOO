@@ -1,0 +1,62 @@
+<odoo>
+    <record id="view_xalaeco_customer_tree" model="ir.ui.view">
+        <field name="name">xalaeco.customer.tree</field>
+        <field name="model">xalaeco.customer</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="customer_code"/>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="customer_type"/>
+                <field name="area"/>
+                <field name="monthly_fee"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xalaeco_customer_form" model="ir.ui.view">
+        <field name="name">xalaeco.customer.form</field>
+        <field name="model">xalaeco.customer</field>
+        <field name="arch" type="xml">
+            <form>
+            <header>
+            <button name="action_create_contract" string="Tạo hợp đồng" type="object" class="btn-primary" invisible="not need_invoice" />
+            </header>
+                <sheet>
+                    <group string="Thông tin khách hàng">
+                        <field name="customer_code"/>
+                        <field name="name"/>
+                        <field name="phone"/>
+                        <field name="address"/>
+                        <field name="area"/>
+                        <field name="customer_type"/>
+                        <field name="need_invoice"/>
+                        <field name="monthly_fee"/>
+                        <field name="state"/>
+                        <field name="note"/>
+                    </group>
+                    <notebook><page string="Hợp đồng của khách hàng"> 
+                    <field name="contract_ids">
+                    <list>
+                    <field name="name"/>
+                    <field name="service_type"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="service_fee"/>
+                    <field name="state"/>
+                    </list>
+                    </field>
+                    </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xalaeco_customer" model="ir.actions.act_window">
+        <field name="name">Danh sách khách hàng</field>
+        <field name="res_model">xalaeco.customer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
