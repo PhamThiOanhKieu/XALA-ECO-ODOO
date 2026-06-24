@@ -1,10 +1,10 @@
 <odoo>
 
-    <record id="view_xalaeco_billing_list" model="ir.ui.view">
-        <field name="name">xalaeco.billing.list</field>
+    <record id="view_xalaeco_billing_tree" model="ir.ui.view">
+        <field name="name">xalaeco.billing.tree</field>
         <field name="model">xalaeco.billing</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name"/>
                 <field name="month"/>
                 <field name="year"/>
@@ -13,7 +13,7 @@
                 <field name="total_paid"/>
                 <field name="total_debt"/>
                 <field name="state"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -56,7 +56,7 @@
                     <notebook>
                         <page string="Danh sách thanh toán được sinh tự động">
                             <field name="payment_ids" readonly="1">
-                                <list>
+                                <tree>
                                     <field name="name"/>
                                     <field name="customer_id"/>
                                     <field name="contract_id"/>
@@ -64,7 +64,7 @@
                                     <field name="amount_paid"/>
                                     <field name="debt_amount"/>
                                     <field name="state"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -76,7 +76,7 @@
     <record id="action_xalaeco_billing" model="ir.actions.act_window">
         <field name="name">Kỳ thu phí</field>
         <field name="res_model">xalaeco.billing</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
 </odoo>

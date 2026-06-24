@@ -4,7 +4,7 @@
         <field name="name">xalaeco.contract.tree</field>
         <field name="model">xalaeco.contract</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name"/>
                 <field name="customer_id"/>
                 <field name="service_type"/>
@@ -13,7 +13,7 @@
                 <field name="waste_volume"/>
                 <field name="service_fee"/>
                 <field name="state"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -61,7 +61,7 @@
     <record id="action_xalaeco_contract" model="ir.actions.act_window">
         <field name="name">Hợp đồng</field>
         <field name="res_model">xalaeco.contract</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
 </odoo>
