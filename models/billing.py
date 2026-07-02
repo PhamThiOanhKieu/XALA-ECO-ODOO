@@ -180,7 +180,7 @@ class XalaEcoBilling(models.Model):
 
                 contract = self.env['xalaeco.contract'].search([
                     ('customer_id', '=', customer.id),
-                    ('state', '=', 'active'),
+                    ('state', 'in', ['active', 'near_expired']),
                 ], limit=1)
 
                 amount_due = contract.service_fee if contract else customer.monthly_fee

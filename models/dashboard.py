@@ -21,8 +21,8 @@ class XalaEcoDashboard(models.Model):
         for record in self:
             payments = Payment.search([])
             record.total_customers = Customer.search_count([])
-            record.active_contracts = Contract.search_count([('state', '=', 'active')])
-            record.near_expired_contracts = len(Contract.search([('state', '=', 'active')]).filtered(lambda c: c.is_near_expired))
+            record.active_contracts = Contract.search_count([('state', 'in', ['active', 'near_expired'])])
+            record.near_expired_contracts = Contract.search_count([('state', '=', 'near_expired')])
             record.total_revenue = sum(payments.mapped('amount_paid'))
             record.total_expected = sum(payments.mapped('amount_due'))
             record.total_debt = sum(payments.mapped('debt_amount'))
