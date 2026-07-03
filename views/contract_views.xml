@@ -1,11 +1,10 @@
 <odoo>
 
     <record id="view_xalaeco_contract_tree" model="ir.ui.view">
-        <field name="name">xalaeco.contract.tree</field>
+        <field name="name">xalaeco.contract.list</field>
         <field name="model">xalaeco.contract</field>
         <field name="arch" type="xml">
-            <tree>
-            <list decoration-danger="state == 'expired'" decoration-warning="state == 'near_expired'">
+             <list decoration-danger="state == 'expired'" decoration-warning="state == 'near_expired'">
                 <field name="name"/>
                 <field name="customer_id"/>
                 <field name="service_type"/>
@@ -13,14 +12,12 @@
                 <field name="end_date"/>
                 <field name="days_until_expiry" string="Còn lại (ngày)"/>
                 <field name="waste_volume"/>
-                <field name="service_fee"/>
-                <field name="state"/>
-            </tree>
+                 <field name="service_fee"/>
                 <field name="state" widget="badge"
-                    decoration-success="state == 'active'"
-                    decoration-warning="state == 'near_expired'"
-                    decoration-danger="state == 'expired'"
-                    decoration-info="state == 'draft'"/>
+                       decoration-success="state == 'active'"
+                       decoration-warning="state == 'near_expired'"
+                       decoration-danger="state == 'expired'"
+                       decoration-info="state == 'draft'"/>
             </list>
         </field>
     </record>
@@ -47,11 +44,8 @@
                         options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
-                    <!-- Dynamic Summary Cards -->
-                    <div class="row g-3 mb-4">
-                        <!-- Card 1: Expiration & Status -->
-                        <div class="col-12 col-md-3">
-                            <!-- Draft State Card -->
+                     <div class="row g-3 mb-4">
+                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f8f9fa; border-left: 4px solid #adb5bd !important;" invisible="state != 'draft'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
@@ -64,8 +58,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Active State Card -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;" invisible="state != 'active'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;" invisible="state != 'active'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
                                         <i class="fa fa-check text-success fs-5" style="color: #2ec4b6 !important;" title="Đang hiệu lực"/>
@@ -79,8 +72,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Near Expired Card -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state != 'near_expired'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state != 'near_expired'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe8cc;">
                                         <i class="fa fa-clock-o text-warning fs-4" style="color: #fd7e14 !important;" title="Sắp hết hạn"/>
@@ -96,8 +88,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Expired Card -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state != 'expired'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state != 'expired'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe3e3;">
                                         <i class="fa fa-exclamation-triangle text-danger fs-5" title="Hết hạn"/>
@@ -108,8 +99,7 @@
                                         <div class="text-muted small">Vui lòng gia hạn</div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Cancelled Card -->
+                             </div>
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state != 'cancelled'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
@@ -124,8 +114,7 @@
                             </div>
                         </div>
 
-                        <!-- Card 2: Price / Fee -->
-                        <div class="col-12 col-md-3">
+                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
@@ -143,8 +132,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Card 3: Customer Info -->
+ 
                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f0f4ff; border-left: 4px solid #4895ef !important;">
                                 <div class="d-flex align-items-center">
@@ -167,8 +155,7 @@
                             </div>
                         </div>
 
-                        <!-- Card 4: Service Type -->
-                        <div class="col-12 col-md-3">
+                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fdf2f8; border-left: 4px solid #db2777 !important;">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fce7f3;">
@@ -186,9 +173,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <group string="Thông tin hợp đồng">
+                    </div> <group string="Thông tin hợp đồng">
                         <field name="name"/>
                         <field name="customer_id"/>
                         <field name="service_type"/>
@@ -203,17 +188,16 @@
                     </group>
 
                     <group string="Hồ sơ hợp đồng">
-                        <field name="attachment"
-                               filename="attachment_name"/>
+                        <field name="attachment" filename="attachment_name"/>
                         <field name="attachment_name"/>
                         <field name="legal_note"/>
                     </group>
 
                     <group string="Thông tin xuất hóa đơn">
-                    <field name="invoice_required"/>
-                    <field name="tax_code"/>
-                    <field name="invoice_name"/>
-                    <field name="invoice_address"/>
+                        <field name="invoice_required"/>
+                        <field name="tax_code"/>
+                        <field name="invoice_name"/>
+                        <field name="invoice_address"/>
                     </group>
 
                 </sheet>
@@ -225,7 +209,7 @@
     <record id="action_xalaeco_contract" model="ir.actions.act_window">
         <field name="name">Hợp đồng</field>
         <field name="res_model">xalaeco.contract</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
-</odoo>
+ </odoo>

@@ -1,20 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_xalaeco_customer_tree" model="ir.ui.view">
         <field name="name">xalaeco.customer.tree</field>
         <field name="model">xalaeco.customer</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="customer_code"/>
                 <field name="route_id"/>
                 <field name="name"/>
                 <field name="customer_type"/>
                 <field name="area"/>
-                <field name="monthly_fee"/>
-                <field name="state"/>
-            </tree>
+                 <field name="monthly_fee"/>
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="contract_count" string="Hợp đồng"/>
+                <field name="state"/>
                 <field name="state_display" string="Trạng thái" widget="badge"
                        decoration-success="state_display == 'active'"
                        decoration-warning="state_display in ('near_expired', 'paused')"
@@ -36,12 +36,9 @@
                     <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 
-                <sheet>
-                    <!-- Dynamic Summary Cards for Customer -->
-                    <div class="row g-3 mb-4">
-                        <!-- Card 1: Customer Status -->
-                        <div class="col-12 col-md-3">
-                            <!-- Active Status -->
+                 <sheet>
+                     <div class="row g-3 mb-4">
+                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;" invisible="state_display != 'active'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
@@ -54,8 +51,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Near Expired Status -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state_display != 'near_expired'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state_display != 'near_expired'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe8cc;">
                                         <i class="fa fa-clock-o text-warning fs-4" style="color: #fd7e14 !important;" title="Sắp hết hạn"/>
@@ -67,8 +63,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Expired Status -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state_display != 'expired'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state_display != 'expired'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe3e3;">
                                         <i class="fa fa-exclamation-triangle text-danger fs-5" title="Đã hết hạn"/>
@@ -80,8 +75,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Paused Status -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fffaf0; border-left: 4px solid #f0ad4e !important;" invisible="state_display != 'paused'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fffaf0; border-left: 4px solid #f0ad4e !important;" invisible="state_display != 'paused'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fcf8e3;">
                                         <i class="fa fa-pause text-warning fs-5" style="color: #f0ad4e !important;" title="Tạm ngưng"/>
@@ -93,8 +87,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Stopped Status -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state_display != 'stopped'">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state_display != 'stopped'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
                                         <i class="fa fa-stop text-muted fs-5" title="Ngừng dịch vụ"/>
@@ -107,8 +100,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Card 2: Contract Count -->
+ 
                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f0f4ff; border-left: 4px solid #4895ef !important;">
                                 <div class="d-flex align-items-center">
@@ -125,8 +117,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Card 3: Monthly Fee -->
+ 
                         <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;">
                                 <div class="d-flex align-items-center">
@@ -145,11 +136,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Card 4: Invoice Status -->
+ 
                         <div class="col-12 col-md-3">
-                            <!-- Needs Invoice -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fdf2f8; border-left: 4px solid #db2777 !important;" invisible="not need_invoice">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fdf2f8; border-left: 4px solid #db2777 !important;" invisible="not need_invoice">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fce7f3;">
                                         <i class="fa fa-calculator fs-5" style="color: #db2777 !important;" title="Có hóa đơn"/>
@@ -165,8 +154,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- No Invoice Needed -->
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f8f9fa; border-left: 4px solid #adb5bd !important;" invisible="need_invoice">
+                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f8f9fa; border-left: 4px solid #adb5bd !important;" invisible="need_invoice">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
                                         <i class="fa fa-ban text-muted fs-5" title="Không hóa đơn"/>
@@ -199,20 +187,22 @@
                             <field name="monthly_fee"/>
                         </group>
                     </group>
-                    <notebook><page string="Hợp đồng của khách hàng"> 
-                    <field name="contract_ids">
-                    <tree>
-                    <field name="name"/>
-                    <field name="service_type"/>
-                    <field name="start_date"/>
-                    <field name="end_date"/>
-                    <field name="service_fee"/>
-                    <field name="state"/>
-                    </tree>
-                    </field>
-                    </page>
-
+                    
                     <notebook>
+                        <page string="Hợp đồng của khách hàng"> 
+                            <field name="contract_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="service_type"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="service_fee"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+
+
                         <page string="Thông tin khách hàng">
                             <group col="2">
                                 <group string="Thông tin liên hệ">
@@ -263,6 +253,6 @@
     <record id="action_xalaeco_customer" model="ir.actions.act_window">
         <field name="name">Khách hàng</field>
         <field name="res_model">xalaeco.customer</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>
