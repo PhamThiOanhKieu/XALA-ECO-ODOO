@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_xalaeco_customer_tree" model="ir.ui.view">
         <field name="name">xalaeco.customer.tree</field>
@@ -6,19 +5,12 @@
         <field name="arch" type="xml">
             <list>
                 <field name="customer_code"/>
-                <field name="route_id"/>
                 <field name="name"/>
+                <field name="phone"/>
                 <field name="customer_type"/>
                 <field name="area"/>
-                 <field name="monthly_fee"/>
-                <field name="phone"/>
-                <field name="email"/>
-                <field name="contract_count" string="Hợp đồng"/>
+                <field name="monthly_fee"/>
                 <field name="state"/>
-                <field name="state_display" string="Trạng thái" widget="badge"
-                       decoration-success="state_display == 'active'"
-                       decoration-warning="state_display in ('near_expired', 'paused')"
-                       decoration-danger="state_display in ('expired', 'stopped')"/>
             </list>
         </field>
     </record>
@@ -27,223 +19,35 @@
         <field name="name">xalaeco.customer.form</field>
         <field name="model">xalaeco.customer</field>
         <field name="arch" type="xml">
-            <form string="Khách hàng">
-                <header>
-                    <button name="action_create_contract" 
-                            string="➕ Tạo hợp đồng mới" 
-                            type="object" 
-                            class="oe_highlight"/>
-                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
-                </header>
-                
-                 <sheet>
-                     <div class="row g-3 mb-4">
-                         <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;" invisible="state_display != 'active'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
-                                        <i class="fa fa-user-plus text-success fs-5" style="color: #2ec4b6 !important;" title="Đang hoạt động"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Trạng thái</div>
-                                        <div class="fs-5 fw-bold" style="color: #2ec4b6;">Đang hoạt động</div>
-                                        <div class="text-muted small">Dịch vụ hoạt động tốt</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state_display != 'near_expired'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe8cc;">
-                                        <i class="fa fa-clock-o text-warning fs-4" style="color: #fd7e14 !important;" title="Sắp hết hạn"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase" style="color: #fd7e14;">Trạng thái</div>
-                                        <div class="fs-5 fw-bold text-warning" style="color: #fd7e14 !important;">Sắp hết hạn</div>
-                                        <div class="text-muted small">Hợp đồng sắp hết hiệu lực</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state_display != 'expired'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe3e3;">
-                                        <i class="fa fa-exclamation-triangle text-danger fs-5" title="Đã hết hạn"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase" style="color: #dc3545;">Trạng thái</div>
-                                        <div class="fs-5 fw-bold text-danger">Đã hết hạn</div>
-                                        <div class="text-muted small">Cần gia hạn hợp đồng</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fffaf0; border-left: 4px solid #f0ad4e !important;" invisible="state_display != 'paused'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fcf8e3;">
-                                        <i class="fa fa-pause text-warning fs-5" style="color: #f0ad4e !important;" title="Tạm ngưng"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase" style="color: #f0ad4e;">Trạng thái</div>
-                                        <div class="fs-5 fw-bold text-warning" style="color: #f0ad4e !important;">Tạm ngưng</div>
-                                        <div class="text-muted small">Đang tạm ngưng dịch vụ</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state_display != 'stopped'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
-                                        <i class="fa fa-stop text-muted fs-5" title="Ngừng dịch vụ"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Trạng thái</div>
-                                        <div class="fs-5 fw-bold text-secondary">Ngừng dịch vụ</div>
-                                        <div class="text-muted small">Đã chấm dứt dịch vụ</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
- 
-                        <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f0f4ff; border-left: 4px solid #4895ef !important;">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #dbeafe;">
-                                        <i class="fa fa-file-text-o text-primary fs-5" style="color: #4895ef !important;" title="Hợp đồng"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Tổng hợp đồng</div>
-                                        <div class="fs-5 fw-bold text-primary">
-                                            <field name="contract_count" readonly="1"/> HĐ
-                                        </div>
-                                        <div class="text-muted small">Liên kết trực tiếp với KH</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
- 
-                        <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
-                                        <i class="fa fa-money text-success fs-5" style="color: #2ec4b6 !important;" title="Đơn giá"/>
-                                    </div>
-                                    <div class="w-100 text-truncate">
-                                        <div class="text-muted small fw-bold text-uppercase">Đơn giá định kỳ</div>
-                                        <div class="fs-5 fw-bold text-success">
-                                            <field name="monthly_fee" readonly="1"/> VNĐ
-                                        </div>
-                                        <div class="text-muted small text-truncate">
-                                            Loại: <field name="customer_type" readonly="1"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
- 
-                        <div class="col-12 col-md-3">
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fdf2f8; border-left: 4px solid #db2777 !important;" invisible="not need_invoice">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fce7f3;">
-                                        <i class="fa fa-calculator fs-5" style="color: #db2777 !important;" title="Có hóa đơn"/>
-                                    </div>
-                                    <div class="w-100 text-truncate">
-                                        <div class="text-muted small fw-bold text-uppercase" style="color: #db2777;">Xuất hóa đơn</div>
-                                        <div class="fs-6 fw-bold text-dark text-truncate">
-                                            MST: <field name="tax_code" readonly="1"/>
-                                        </div>
-                                        <div class="text-muted small text-truncate" style="font-size: 0.82rem;">
-                                            <field name="invoice_name" readonly="1"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f8f9fa; border-left: 4px solid #adb5bd !important;" invisible="need_invoice">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
-                                        <i class="fa fa-ban text-muted fs-5" title="Không hóa đơn"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Xuất hóa đơn</div>
-                                        <div class="fs-6 fw-bold text-secondary">Không yêu cầu</div>
-                                        <div class="text-muted small">Khách hàng tiêu chuẩn</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="oe_title">
-                        <label for="name" class="oe_edit_only" string="Tên khách hàng"/>
-                        <h1>
-                            <field name="name" placeholder="Ví dụ: Nguyễn Văn A hoặc Công ty TNHH XALA..."/>
-                        </h1>
-                    </div>
-
-                    <group col="2">
-                        <group>
-                            <field name="customer_code"/>
-                            <field name="customer_type"/>
-                        </group>
-                        <group>
-                            <field name="area"/>
-                            <field name="route_id"/>
-                            <field name="monthly_fee"/>
-                        </group>
+            <form>
+            <header>
+            <button name="action_create_contract" string="Tạo hợp đồng" type="object" class="btn-primary" invisible="not need_invoice" />
+            </header>
+                <sheet>
+                    <group string="Thông tin khách hàng">
+                        <field name="customer_code"/>
+                        <field name="name"/>
+                        <field name="phone"/>
+                        <field name="address"/>
+                        <field name="area"/>
+                        <field name="customer_type"/>
+                        <field name="need_invoice"/>
+                        <field name="monthly_fee"/>
+                        <field name="state"/>
+                        <field name="note"/>
                     </group>
-                    
-                    <notebook>
-                        <page string="Hợp đồng của khách hàng"> 
-                            <field name="contract_ids">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="service_type"/>
-                                    <field name="start_date"/>
-                                    <field name="end_date"/>
-                                    <field name="service_fee"/>
-                                    <field name="state"/>
-                                </list>
-                            </field>
-                        </page>
-
-
-                        <page string="Thông tin khách hàng">
-                            <group col="2">
-                                <group string="Thông tin liên hệ">
-                                    <field name="phone"/>
-                                    <field name="email"/>
-                                </group>
-                                <group string="Địa chỉ phục vụ">
-                                    <field name="district"/>
-                                </group>
-                            </group>
-                            <group string="Ghi chú thêm">
-                                <field name="note" placeholder="Nhập đặc điểm vị trí hoặc yêu cầu thu gom riêng tại đây..." nolabel="1"/>
-                            </group>
-                        </page>
-
-                        <page string="Thông tin xuất hóa đơn">
-                            <group>
-                                <field name="need_invoice"/>
-                            </group>
-                            <group col="2" invisible="not need_invoice">
-                                <group string="Mã số thuế &amp; Tên">
-                                    <field name="tax_code"/>
-                                    <field name="invoice_name"/>
-                                </group>
-                                <group string="Địa chỉ">
-                                    <field name="invoice_address"/>
-                                </group>
-                            </group>
-                        </page>
-
-                        <page string="Lịch sử hợp đồng">
-                            <field name="contract_ids" readonly="1">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="service_type"/>
-                                    <field name="start_date"/>
-                                    <field name="end_date"/>
-                                    <field name="state" widget="badge"/>
-                                </list>
-                            </field>
-                        </page>
+                    <notebook><page string="Hợp đồng của khách hàng"> 
+                    <field name="contract_ids">
+                    <list>
+                    <field name="name"/>
+                    <field name="service_type"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="service_fee"/>
+                    <field name="state"/>
+                    </list>
+                    </field>
+                    </page>
                     </notebook>
                 </sheet>
             </form>
@@ -251,7 +55,7 @@
     </record>
 
     <record id="action_xalaeco_customer" model="ir.actions.act_window">
-        <field name="name">Khách hàng</field>
+        <field name="name">Danh sách khách hàng</field>
         <field name="res_model">xalaeco.customer</field>
         <field name="view_mode">list,form</field>
     </record>

@@ -1,23 +1,18 @@
 <odoo>
 
     <record id="view_xalaeco_contract_tree" model="ir.ui.view">
-        <field name="name">xalaeco.contract.list</field>
+        <field name="name">xalaeco.contract.tree</field>
         <field name="model">xalaeco.contract</field>
         <field name="arch" type="xml">
-             <list decoration-danger="state == 'expired'" decoration-warning="state == 'near_expired'">
+            <list>
                 <field name="name"/>
                 <field name="customer_id"/>
                 <field name="service_type"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="days_until_expiry" string="Còn lại (ngày)"/>
                 <field name="waste_volume"/>
-                 <field name="service_fee"/>
-                <field name="state" widget="badge"
-                       decoration-success="state == 'active'"
-                       decoration-warning="state == 'near_expired'"
-                       decoration-danger="state == 'expired'"
-                       decoration-info="state == 'draft'"/>
+                <field name="service_fee"/>
+                <field name="state"/>
             </list>
         </field>
     </record>
@@ -27,153 +22,9 @@
         <field name="model">xalaeco.contract</field>
         <field name="arch" type="xml">
             <form>
-                <header>
-                    <button name="action_active_contract" string="Kích hoạt hợp đồng"
-                        type="object" class="btn-primary"
-                        invisible="state != 'draft'"/>
-                    <button name="action_renew_contract" string="Gia hạn hợp đồng"
-                        type="object" class="btn-secondary"
-                        invisible="state not in ('near_expired', 'expired')"
-                        confirm="Bạn có chắc muốn gia hạn hợp đồng thêm 1 năm từ ngày kết thúc hiện tại?"/>
-                    <button name="action_rollover_contract" string="Đáo hạn hợp đồng"
-                        type="object" class="btn-secondary"
-                        invisible="state not in ('near_expired', 'expired')"
-                        confirm="Bạn có chắc muốn đáo hạn hợp đồng từ ngày hôm nay?"/>
-                    <field name="state" widget="statusbar"
-                        statusbar_visible="draft,active,near_expired,expired"
-                        options="{'clickable': '1'}"/>
-                </header>
                 <sheet>
-                     <div class="row g-3 mb-4">
-                         <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f8f9fa; border-left: 4px solid #adb5bd !important;" invisible="state != 'draft'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
-                                        <i class="fa fa-file-o text-muted fs-5" title="Nháp"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Trạng thái</div>
-                                        <div class="fs-5 fw-bold text-secondary">Hợp đồng Nháp</div>
-                                        <div class="text-muted small">Chưa kích hoạt</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;" invisible="state != 'active'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
-                                        <i class="fa fa-check text-success fs-5" style="color: #2ec4b6 !important;" title="Đang hiệu lực"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Trạng thái</div>
-                                        <div class="fs-5 fw-bold" style="color: #2ec4b6;">Đang hiệu lực</div>
-                                        <div class="text-muted small">
-                                            Còn <field name="days_until_expiry" class="fw-bold"/> ngày
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state != 'near_expired'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe8cc;">
-                                        <i class="fa fa-clock-o text-warning fs-4" style="color: #fd7e14 !important;" title="Sắp hết hạn"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase" style="color: #fd7e14;">Sắp hết hạn</div>
-                                        <div class="fs-5 fw-bold text-warning" style="color: #fd7e14 !important;">
-                                            Còn <field name="days_until_expiry"/> ngày
-                                        </div>
-                                        <div class="text-muted small">
-                                            Hạn: <field name="end_date" readonly="1"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state != 'expired'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe3e3;">
-                                        <i class="fa fa-exclamation-triangle text-danger fs-5" title="Hết hạn"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase" style="color: #dc3545;">Hết hạn</div>
-                                        <div class="fs-5 fw-bold text-danger">Đã hết hạn</div>
-                                        <div class="text-muted small">Vui lòng gia hạn</div>
-                                    </div>
-                                </div>
-                             </div>
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state != 'cancelled'">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
-                                        <i class="fa fa-times text-muted fs-5" title="Đã hủy"/>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted small fw-bold text-uppercase">Trạng thái</div>
-                                        <div class="fs-5 fw-bold text-secondary">Đã hủy bỏ</div>
-                                        <div class="text-muted small">Không áp dụng</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                         <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
-                                        <i class="fa fa-usd fs-5" style="color: #2ec4b6 !important;" title="Phí phục vụ"/>
-                                    </div>
-                                    <div class="w-100 text-truncate">
-                                        <div class="text-muted small fw-bold text-uppercase">Phí phục vụ</div>
-                                        <div class="fs-5 fw-bold" style="color: #2ec4b6;">
-                                            <field name="service_fee" readonly="1"/> VNĐ
-                                        </div>
-                                        <div class="text-muted small">
-                                            Chu kỳ: <field name="billing_cycle" readonly="1"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
- 
-                        <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f0f4ff; border-left: 4px solid #4895ef !important;">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #dbeafe;">
-                                        <i class="fa fa-user text-primary fs-5" style="color: #4895ef !important;" title="Khách hàng"/>
-                                    </div>
-                                    <div class="w-100 text-truncate">
-                                        <div class="text-muted small fw-bold text-uppercase">Khách hàng</div>
-                                        <div class="fs-6 fw-bold text-primary text-truncate">
-                                            <field name="customer_id" readonly="1" options="{'no_open': True}"/>
-                                        </div>
-                                        <div class="text-muted small text-truncate" style="font-size: 0.82rem;">
-                                            <i class="fa fa-phone me-1" title="Điện thoại"/> <field name="customer_phone"/>
-                                        </div>
-                                        <div class="text-muted small text-truncate" style="font-size: 0.82rem;">
-                                            <i class="fa fa-envelope-o me-1" title="Email"/> <field name="customer_email"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                         <div class="col-12 col-md-3">
-                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fdf2f8; border-left: 4px solid #db2777 !important;">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fce7f3;">
-                                        <i class="fa fa-bookmark fs-5" style="color: #db2777 !important;" title="Dịch vụ"/>
-                                    </div>
-                                    <div class="w-100 text-truncate">
-                                        <div class="text-muted small fw-bold text-uppercase">Dịch vụ</div>
-                                        <div class="fs-6 fw-bold text-dark text-truncate">
-                                            <field name="service_type" readonly="1"/>
-                                        </div>
-                                        <div class="text-muted small text-truncate" style="font-size: 0.82rem;">
-                                            Vùng: <field name="pricing_area" readonly="1"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> <group string="Thông tin hợp đồng">
+                    <group string="Thông tin hợp đồng">
                         <field name="name"/>
                         <field name="customer_id"/>
                         <field name="service_type"/>
@@ -184,24 +35,25 @@
                         <field name="pricing_area"/>
                         <field name="waste_volume"/>
                         <field name="service_fee"/>
-                        <field name="is_near_expired" invisible="1"/>
+                        <field name="state"/>
+                        <field name="is_near_expired"/>
                     </group>
 
                     <group string="Hồ sơ hợp đồng">
-                        <field name="attachment" filename="attachment_name"/>
+                        <field name="attachment"
+                               filename="attachment_name"/>
                         <field name="attachment_name"/>
                         <field name="legal_note"/>
                     </group>
 
                     <group string="Thông tin xuất hóa đơn">
-                        <field name="invoice_required"/>
-                        <field name="tax_code"/>
-                        <field name="invoice_name"/>
-                        <field name="invoice_address"/>
+                    <field name="invoice_required"/>
+                    <field name="tax_code"/>
+                    <field name="invoice_name"/>
+                    <field name="invoice_address"/>
                     </group>
 
                 </sheet>
-                <chatter/>
             </form>
         </field>
     </record>
@@ -212,4 +64,4 @@
         <field name="view_mode">list,form</field>
     </record>
 
- </odoo>
+</odoo>
