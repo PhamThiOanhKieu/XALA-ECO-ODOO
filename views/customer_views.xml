@@ -6,7 +6,6 @@
             <list>
                 <field name="customer_code"/>
                 <field name="name"/>
-                <field name="phone"/>
                 <field name="customer_type"/>
                 <field name="area"/>
                 <field name="monthly_fee"/>
