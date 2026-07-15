@@ -8,6 +8,7 @@
     'depends': ['base', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'views/hr_management_views.xml',
         'data/sequence.xml',
         'data/dashboard_data.xml',
         'data/contract_cron.xml',
@@ -17,8 +18,12 @@
         'views/billing_views.xml',
         'views/payment_views.xml',
         'views/dashboard_views.xml',
+        'views/employee_map_views.xml',
         'views/menu.xml',
-    ],
+
+        'views/mobile_templates.xml', 
+        
+            ],
     'installable': True,
     'application': True,
 }

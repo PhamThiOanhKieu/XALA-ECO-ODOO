@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- GIAO DIỆN DẠNG DANH SÁCH (LIST VIEW) -->
     <record id="view_xalaeco_customer_tree" model="ir.ui.view">
         <field name="name">xalaeco.customer.tree</field>
         <field name="model">xalaeco.customer</field>
@@ -10,7 +11,7 @@
                 <field name="name"/>
                 <field name="customer_type"/>
                 <field name="area"/>
-                 <field name="monthly_fee"/>
+                <field name="monthly_fee"/>
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="contract_count" string="Hợp đồng"/>
@@ -23,22 +24,28 @@
         </field>
     </record>
 
+    <!-- GIAO DIỆN CHI TIẾT (FORM VIEW) -->
     <record id="view_xalaeco_customer_form" model="ir.ui.view">
         <field name="name">xalaeco.customer.form</field>
         <field name="model">xalaeco.customer</field>
         <field name="arch" type="xml">
             <form string="Khách hàng">
                 <header>
+                    <!-- Đã sửa dấu cộng màu trắng bằng icon hệ thống fa-plus -->
                     <button name="action_create_contract" 
-                            string="➕ Tạo hợp đồng mới" 
+                            string="Tạo hợp đồng mới" 
+                            icon="fa-plus"
                             type="object" 
                             class="oe_highlight"/>
                     <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
-                </header>
+                </header>                
                 
-                 <sheet>
-                     <div class="row g-3 mb-4">
-                         <div class="col-12 col-md-3">
+                <!-- QUAN TRỌNG: Đã thêm style max-width và width 100% để ép form tràn viền, xóa khoảng trắng bên phải -->
+                <sheet style="max-width: 100% !important; width: 100% !important;">
+                    
+                    <!-- Khối thẻ trạng thái (Hàng 1) -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-3">
                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f4fbf7; border-left: 4px solid #2ec4b6 !important;" invisible="state_display != 'active'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #cbf3f0;">
@@ -51,7 +58,7 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state_display != 'near_expired'">
+                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff9f0; border-left: 4px solid #fd7e14 !important;" invisible="state_display != 'near_expired'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe8cc;">
                                         <i class="fa fa-clock-o text-warning fs-4" style="color: #fd7e14 !important;" title="Sắp hết hạn"/>
@@ -63,7 +70,7 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state_display != 'expired'">
+                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fff5f5; border-left: 4px solid #dc3545 !important;" invisible="state_display != 'expired'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ffe3e3;">
                                         <i class="fa fa-exclamation-triangle text-danger fs-5" title="Đã hết hạn"/>
@@ -75,7 +82,7 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fffaf0; border-left: 4px solid #f0ad4e !important;" invisible="state_display != 'paused'">
+                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #fffaf0; border-left: 4px solid #f0ad4e !important;" invisible="state_display != 'paused'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fcf8e3;">
                                         <i class="fa fa-pause text-warning fs-5" style="color: #f0ad4e !important;" title="Tạm ngưng"/>
@@ -87,7 +94,7 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state_display != 'stopped'">
+                            <div class="card border-0 shadow-sm p-3 h-100" style="background-color: #f1f3f5; border-left: 4px solid #868e96 !important;" invisible="state_display != 'stopped'">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef;">
                                         <i class="fa fa-stop text-muted fs-5" title="Ngừng dịch vụ"/>
@@ -169,26 +176,35 @@
                         </div>
                     </div>
 
-                    <div class="oe_title">
+                    <!-- Tiêu đề Tên khách hàng (Được mở rộng tối đa) -->
+                    <div class="oe_title" style="max-width: 100% !important;">
                         <label for="name" class="oe_edit_only" string="Tên khách hàng"/>
                         <h1>
-                            <field name="name" placeholder="Ví dụ: Nguyễn Văn A hoặc Công ty TNHH XALA..."/>
+                            <field name="name" placeholder="Ví dụ: Nguyễn Văn A hoặc Công ty TNHH XALA..." class="w-100"/>
                         </h1>
                     </div>
 
-                    <group col="2">
-                        <group>
-                            <field name="customer_code"/>
-                            <field name="customer_type"/>
-                        </group>
-                        <group>
-                            <field name="area"/>
-                            <field name="route_id"/>
-                            <field name="monthly_fee"/>
-                        </group>
-                    </group>
+                    <!-- Layout lưới thông tin chính chia làm 2 cụm trải đều hai bên -->
+                    <div class="row mt-3">
+                        <div class="col-12 col-md-6">
+                            <group>
+                                <field name="customer_code"/>
+                                <field name="customer_type"/>
+                                <field name="district"/>
+                            </group>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <group>
+                                <field name="area"/>
+                                <field name="route_id"/>
+                                <field name="monthly_fee"/>
+                            </group>
+                        </div>
+                    </div>
                     
-                    <notebook>
+                    
+                    <!-- Khối các Tab tính năng bên dưới -->
+                    <notebook class="mt-4">
                         <page string="Hợp đồng của khách hàng"> 
                             <field name="contract_ids">
                                 <list>
@@ -202,35 +218,65 @@
                             </field>
                         </page>
 
-
                         <page string="Thông tin khách hàng">
-                            <group col="2">
-                                <group string="Thông tin liên hệ">
-                                    <field name="phone"/>
-                                    <field name="email"/>
-                                </group>
-                                <group string="Địa chỉ phục vụ">
-                                    <field name="district"/>
-                                </group>
-                            </group>
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <group string="Thông tin liên hệ">
+                                        <field name="phone"/>
+                                        <field name="email"/>
+                                    </group>
+                                </div>
+                            </div>
                             <group string="Ghi chú thêm">
                                 <field name="note" placeholder="Nhập đặc điểm vị trí hoặc yêu cầu thu gom riêng tại đây..." nolabel="1"/>
                             </group>
                         </page>
 
                         <page string="Thông tin xuất hóa đơn">
-                            <group>
-                                <field name="need_invoice"/>
-                            </group>
-                            <group col="2" invisible="not need_invoice">
-                                <group string="Mã số thuế &amp; Tên">
-                                    <field name="tax_code"/>
-                                    <field name="invoice_name"/>
-                                </group>
-                                <group string="Địa chỉ">
-                                    <field name="invoice_address"/>
-                                </group>
-                            </group>
+                            <!-- Checkbox hàng ngang -->
+                            <div class="d-flex align-items-center mb-4 p-2" style="background-color: #f8f9fa; border-radius: 4px;">
+                                <span style="white-space: nowrap; font-weight: bold; margin-right: 15px; font-size: 14px;">Có nhu cầu xuất hóa đơn</span>
+                                <field name="need_invoice" nolabel="1"/>
+                            </div>
+
+                            <!-- Form xuất hóa đơn -->
+                            <div invisible="not need_invoice" style="margin-top: 15px;">
+                                <div class="row">
+                                    <!-- Cột bên trái: Mã số thuế & Tên đơn vị -->
+                                    <div class="col-md-6">
+                                        <h5 class="border-bottom pb-2 mb-3" style="font-size: 14px; font-weight: 600; color: #495057;">MÃ SỐ THUẾ &amp; TÊN</h5>
+                                        
+                                        <!-- Hàng Mã số thuế -->
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span style="white-space: nowrap; font-weight: 500; min-width: 180px; color: #495057;">Mã số thuế</span>
+                                            <div class="flex-grow-1">
+                                                <field name="tax_code" nolabel="1" class="w-100"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hàng Tên đơn vị -->
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span style="white-space: nowrap; font-weight: 500; min-width: 180px; color: #495057;">Tên đơn vị xuất hóa đơn</span>
+                                            <div class="flex-grow-1">
+                                                <field name="invoice_name" nolabel="1" class="w-100"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cột bên phải: Địa chỉ -->
+                                    <div class="col-md-6">
+                                        <h5 class="border-bottom pb-2 mb-3" style="font-size: 14px; font-weight: 600; color: #495057;">ĐỊA CHỈ</h5>
+                                        
+                                        <!-- Hàng Địa chỉ -->
+                                        <div class="d-flex mb-3">
+                                            <span style="white-space: nowrap; font-weight: 500; min-width: 150px; color: #495057; margin-top: 5px;">Địa chỉ xuất hóa đơn</span>
+                                            <div class="flex-grow-1">
+                                                <field name="invoice_address" nolabel="1" class="w-100"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </page>
 
                         <page string="Lịch sử hợp đồng">
@@ -250,6 +296,7 @@
         </field>
     </record>
 
+    <!-- HÀNH ĐỘNG CỦA MENU KHÁCH HÀNG -->
     <record id="action_xalaeco_customer" model="ir.actions.act_window">
         <field name="name">Khách hàng</field>
         <field name="res_model">xalaeco.customer</field>

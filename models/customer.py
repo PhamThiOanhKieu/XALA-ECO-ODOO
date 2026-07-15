@@ -4,32 +4,48 @@ class XalaEcoCustomer(models.Model):
     _name = 'xalaeco.customer'
     _description = 'Khách hàng XALA ECO'
 
-    # --- THÔNG TIN ĐỊNH DANH ---
+# --- THÔNG TIN ĐỊNH DANH ---
     name = fields.Char(string='Tên khách hàng', required=True)
     customer_code = fields.Char(string='Mã khách hàng', required=True)
     phone = fields.Char(string='Số điện thoại')
     email = fields.Char(string='Email')
+    
     area = fields.Selection([
+        ('Tuyến Quận 1 - Quận 3', 'Tuyến Quận 1 - Quận 3'),
+        ('Tuyến Quận 5 - Quận 6', 'Tuyến Quận 5 - Quận 6'),
+        ('Tuyến Quận 10 - Quận 11', 'Tuyến Quận 10 - Quận 11'),
+        ('Tuyến Bình Thạnh - Gò Vấp', 'Tuyến Bình Thạnh - Gò Vấp'),
         ('Tuyến Thủ Đức', 'Tuyến Thủ Đức'),
-        ('Tuyến Bình Thạnh', 'Tuyến Bình Thạnh'),
-        ('Tuyến Huỳnh Tịnh Của - Trần Quốc Toản', 'Tuyến Huỳnh Tịnh Của - Trần Quốc Toản'),
-        ('Tuyến Phan Xích Long - Nguyễn Kiệm', 'Tuyến Phan Xích Long - Nguyễn Kiệm'),
-        ('Tuyến Tân Bình - Tân Phú', 'Tuyến Tân Bình - Tân Phú'),
         ('Tuyến Quận 7 - Nhà Bè', 'Tuyến Quận 7 - Nhà Bè'),
-        ('Tuyến Quận 8 - Bình Chánh', 'Tuyến Quận 8 - Bình Chánh'),
+        ('Tuyến Tân Bình - Tân Phú', 'Tuyến Tân Bình - Tân Phú'),
         ('Tuyến Hóc Môn - Quận 12', 'Tuyến Hóc Môn - Quận 12'),
-        ('Tuyến Nguyễn Trãi - Trần Hưng Đạo', 'Tuyến Nguyễn Trãi - Trần Hưng Đạo'),
     ], string='Khu vực/Tuyến')
     route_id = fields.Char(string='Mã Tuyến')
-    
 
-    # --- ĐỊA CHỈ PHỤC VỤ ---
-   
     district = fields.Selection([
-        ('urban', 'TP. Thủ Đức/Bình Thạnh/Quận 1/Quận 3/Quận 5/Quận 10/Quận 6/Quận 7/QuậnBình Tân/Tân Phú/Phú Nhuận/'),
-        ('suburban', 'Hóc Môn/Nhà Bè/Cần Giờ'),
+        ('quan_1', 'Quận 1'),
+        ('quan_3', 'Quận 3'),
+        ('quan_4', 'Quận 4'),
+        ('quan_5', 'Quận 5'),
+        ('quan_6', 'Quận 6'),
+        ('quan_7', 'Quận 7'),
+        ('quan_8', 'Quận 8'),
+        ('quan_10', 'Quận 10'),
+        ('quan_11', 'Quận 11'),
+        ('quan_12', 'Quận 12'),
+        ('binh_tan', 'Quận Bình Tân'),
+        ('binh_thanh', 'Quận Bình Thạnh'),
+        ('go_vap', 'Quận Gò Vấp'),
+        ('phu_nhuan', 'Quận Phú Nhuận'),
+        ('tan_binh', 'Quận Tân Bình'),
+        ('tan_phu', 'Quận Tân Phú'),
+        ('thu_duc', 'TP. Thủ Đức'),
+        ('binh_chanh', 'Huyện Bình Chánh'),
+        ('can_gio', 'Huyện Cần Giờ'),
+        ('cu_chi', 'Huyện Củ Chi'),
+        ('hoc_mon', 'Huyện Hóc Môn'),
+        ('nha_be', 'Huyện Nhà Bè'),
     ], string="Khu vực/Quận huyện")
-    
 
     # --- PHÂN LOẠI & TRẠNG THÁI ---
     customer_type = fields.Selection([
@@ -101,6 +117,9 @@ class XalaEcoCustomer(models.Model):
     # --- CHỨC NĂNG TẠO NHANH HỢP ĐỒNG TỪ KHÁCH HÀNG ---
     def action_create_contract(self):
         self.ensure_one()
+        default_pricing_area = 'urban'
+        if self.district in ['binh_chanh', 'can_gio', 'cu_chi', 'hoc_mon', 'nha_be', 'suburban']:
+            default_pricing_area = 'suburban'
         return {
             'type': 'ir.actions.act_window',
             'name': 'Tạo hợp đồng xuất hóa đơn',
@@ -114,5 +133,6 @@ class XalaEcoCustomer(models.Model):
                 'default_tax_code': self.tax_code,
                 'default_invoice_name': self.invoice_name,
                 'default_invoice_address': self.invoice_address,
+                'default_pricing_area': default_pricing_area,
             }
         }

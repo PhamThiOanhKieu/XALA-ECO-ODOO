@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xala_employee_list" model="ir.ui.view">
+        <field name="name">xala.employee.list</field>
+        <field name="model">xala.employee</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="employee_code"/>
+                <field name="employee_name"/>
+                <field name="phone"/>
+                <field name="role"/>
+                <field name="route_id"/>
+                <field name="route_name"/>
+                <field name="login_account"/> 
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xala_employee_form" model="ir.ui.view">
+        <field name="name">xala.employee.form</field>
+        <field name="model">xala.employee</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                <group>
+                    <group>
+                        <field name="employee_code"/>
+                        <field name="employee_name"/>
+                        <field name="phone"/>
+                        <field name= "role"/>
+                    </group>
+                    <group>
+                        <field name="route_id"/>
+                        <field name="route_name"/>
+                        <field name="login_account"/>
+                        <field name="password" password="True"/>
+                        <field name="state"/>
+                    </group>
+                </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xala_employee" model="ir.actions.act_window">
+        <field name="name">Quản lý Nhân viên</field>
+        <field name="res_model">xala.employee</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_xala_work_history_list" model="ir.ui.view">
+        <field name="name">xala.work.history.list</field>
+        <field name="model">xala.work.history</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="shift_code"/>
+                <field name="work_date"/>
+                <field name="employee_code"/>
+                <field name="employee_name"/>
+                <field name="route_name"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="shift_status"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xala_work_history_form" model="ir.ui.view">
+        <field name="name">xala.work.history.form</field>
+        <field name="model">xala.work.history</field>
+        <field name="arch" type="xml">
+            <form string="Chi tiết Ca làm việc">
+                <sheet>
+                    <group>
+                        <group string="Thông tin chung">
+                            <field name="shift_code"/>
+                            <field name="employee_code"/>
+                            <field name="employee_name"/>
+                            <field name="shift_status"/>
+                        </group>
+                        <group string="Minh chứng Check-in">
+                            <field name="start_time"/>
+                            <field name="gps_check_in"/>
+                            <field name="image_check_in" widget="image" options="{'size': [300, 300]}"/>
+                        </group>
+                        <group string="Minh chứng Check-out">
+                            <field name="end_time"/>
+                            <field name="gps_check_out"/>
+                            <field name="image_check_out" widget="image" options="{'size': [300, 300]}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xala_work_history" model="ir.actions.act_window">
+        <field name="name">Lịch sử ca làm việc</field>
+        <field name="res_model">xala.work.history</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_xala_shift_list" model="ir.ui.view">
+        <field name="name">xala.shift.list</field>
+        <field name="model">xala.shift</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="shift_code"/>
+                <field name="employee_id"/>
+                <field name="route_name"/>
+                <field name="date_assigned"/>
+                <field name="shift_type"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xala_shift_form" model="ir.ui.view">
+        <field name="name">xala.shift.form</field>
+        <field name="model">xala.shift</field>
+        <field name="arch" type="xml">
+           <form>
+                <sheet>
+                    <group>
+                        <group string="Thông tin nhân sự">
+                            <field name="employee_id" options="{'no_create': True}"/>
+                            <field name="employee_code"/>
+                            <field name="phone"/>
+                            <field name="role"/>
+                        </group>
+                        
+                        <group string="Chi tiết ca làm việc">
+                            <field name='shift_code'/>
+                            <field name="route_id"/>
+                            <field name="route_name"/>
+                            <field name="date_assigned"/>
+                            <field name="shift_type"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xala_shift" model="ir.actions.act_window">
+        <field name="name">Phân công ca làm việc</field>
+        <field name="res_model">xala.shift</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

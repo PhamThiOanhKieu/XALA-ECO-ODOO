@@ -6,7 +6,6 @@ _logger = logging.getLogger(__name__)
 
 class XalaEcoContract(models.Model):
     _name = 'xalaeco.contract'
-    _inherit = ['mail.thread']
     _description = 'Hợp đồng dịch vụ XALA ECO'
     _order = 'priority_order asc, end_date asc'
 
@@ -39,8 +38,10 @@ class XalaEcoContract(models.Model):
     ('suburban', 'Hóc Môn/Nhà Bè/Cần Giờ'),
     ], string='Khu vực tính giá', default='urban')
     
-    waste_volume = fields.Float(string='Khối lượng rác/tháng (kg)')
-    
+    waste_volume = fields.Float(string='Khối lượng rác (kg/tháng)')
+
+    collection_fee = fields.Float(string='Phí thu gom', compute='_compute_service_fee', store=True, readonly=False)
+    transport_fee = fields.Float(string='Phí vận chuyển', compute='_compute_service_fee', store=True, readonly=False)
     service_fee = fields.Float( string='Phí phục vụ mỗi kỳ', compute='_compute_service_fee', store=True, readonly=False )
 
     attachment = fields.Binary(string='File scan hợp đồng')
@@ -64,30 +65,51 @@ class XalaEcoContract(models.Model):
     expiry_status_msg = fields.Char(string='Cảnh báo hạn', compute='_compute_expiry_status_msg')
     priority_order = fields.Integer(string='Thứ tự ưu tiên', compute='_compute_priority_order', store=True)
 
+    @api.onchange('customer_id')
+    def _onchange_customer_id(self):
+        if self.customer_id and self.customer_id.district:
+            if self.customer_id.district in ['binh_chanh', 'can_gio', 'cu_chi', 'hoc_mon', 'nha_be', 'suburban']:
+                self.pricing_area = 'suburban'
+            else:
+                self.pricing_area = 'urban'
+
+    # Bảng giá: mỗi mốc khối lượng ứng với (phí thu gom, phí vận chuyển).
+    # Trên 420kg: đơn giá theo kg cho từng loại phí.
+    _FEE_TABLE = {
+        'urban': {
+            'tiers': [(126, 61000, 23000), (250, 91000, 34000), (420, 163000, 60000)],
+            'rate_per_kg': (485.97, 180.07),
+        },
+        'suburban': {
+            'tiers': [(126, 57000, 23000), (250, 85000, 34000), (420, 152000, 60000)],
+            'rate_per_kg': (485.97, 180.07),
+        },
+    }
+
     @api.depends('pricing_area', 'waste_volume')
     def _compute_service_fee(self):
         for record in self:
             kg = record.waste_volume or 0
-            if record.pricing_area == 'urban':
-                if kg <= 126:
-                    record.service_fee = 61000
-                elif kg <= 250:
-                    record.service_fee = 91000
-                elif kg <= 420:
-                    record.service_fee = 163000
-                else:
-                    record.service_fee = kg * 485.97
-            elif record.pricing_area == 'suburban':
-                if kg <= 126:
-                    record.service_fee = 57000
-                elif kg <= 250:
-                    record.service_fee = 85000
-                elif kg <= 420:
-                    record.service_fee = 152000
-                else:
-                    record.service_fee = kg * 485.97
-            else:
+            table = self._FEE_TABLE.get(record.pricing_area)
+            if not table:
+                record.collection_fee = 0.0
+                record.transport_fee = 0.0
                 record.service_fee = 0.0
+                continue
+
+            collection = transport = None
+            for limit, coll, trans in table['tiers']:
+                if kg <= limit:
+                    collection, transport = coll, trans
+                    break
+            if collection is None:
+                coll_rate, trans_rate = table['rate_per_kg']
+                collection = kg * coll_rate
+                transport = kg * trans_rate
+
+            record.collection_fee = collection
+            record.transport_fee = transport
+            record.service_fee = collection + transport
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -157,7 +179,31 @@ class XalaEcoContract(models.Model):
                 else:
                     record.state = 'active'
 
+    @api.constrains('state', 'start_date', 'end_date')
+    def _check_state_dates(self):
+        """Đã gỡ bỏ logic ValidationError cũ để tránh chặn người dùng khi chỉnh ngày về quá khứ"""
+        pass
+
     def write(self, vals):
+        # Tính toán lại trạng thái tự động dựa trên ngày kết thúc mới TRƯỚC KHI lưu vào DB
+        if 'end_date' in vals:
+            today = date.today()
+            end_date_val = fields.Date.to_date(vals['end_date'])
+            
+            for record in self:
+                # Chỉ tự động cập nhật trạng thái nếu hợp đồng đang ở nhóm quản lý vòng đời (Active, Near Expired, Expired)
+                current_state = vals.get('state', record.state)
+                if current_state in ['active', 'near_expired', 'expired']:
+                    if end_date_val:
+                        if end_date_val < today:
+                            vals['state'] = 'expired'
+                        elif end_date_val <= today + timedelta(days=7):
+                            vals['state'] = 'near_expired'
+                        else:
+                            vals['state'] = 'active'
+                    else:
+                        vals['state'] = 'active'
+
         res = super(XalaEcoContract, self).write(vals)
         if 'end_date' in vals or 'start_date' in vals:
             self._update_state_from_dates()
@@ -166,8 +212,14 @@ class XalaEcoContract(models.Model):
     def action_active_contract(self):
         """Kích hoạt hợp đồng."""
         for record in self:
-            record.state = 'active'
-            record._update_state_from_dates()
+            today = date.today()
+            correct_state = 'active'
+            if record.end_date:
+                if record.end_date < today:
+                    correct_state = 'expired'
+                elif record.end_date <= today + timedelta(days=7):
+                    correct_state = 'near_expired'
+            record.write({'state': correct_state})
 
     @api.model
     def _cron_check_contract_expiry(self):
@@ -183,7 +235,6 @@ class XalaEcoContract(models.Model):
             ('end_date', '>=', today),
         ])
         if near_expired_contracts:
-            # Lấy danh sách đối tác của tất cả người dùng hệ thống để gửi thông báo
             internal_users = self.env['res.users'].search([('share', '=', False)])
             partner_ids = internal_users.mapped('partner_id').ids
 
@@ -191,14 +242,7 @@ class XalaEcoContract(models.Model):
                 contract.state = 'near_expired'
                 days_left = (contract.end_date - today).days
                 _logger.info('Hợp đồng %s sắp hết hạn sau %d ngày.', contract.name, days_left)
-
-                # Gửi thông báo đến hộp thư thông báo (Inbox/Discuss)
-                contract.message_post(
-                    body=f"⚠️ <b>CẢNH BÁO HỢP ĐỒNG SẮP HẾT HẠN:</b> Hợp đồng <b>{contract.name}</b> của khách hàng <b>{contract.customer_id.name}</b> sắp hết hạn vào ngày {contract.end_date} (còn {days_left} ngày). Vui lòng gia hạn hoặc đáo hạn hợp đồng.",
-                    message_type='comment',
-                    subtype_xmlid='mail.mt_comment',
-                    partner_ids=partner_ids,
-                )
+                pass
 
         # Tìm hợp đồng đã hết hạn
         expired_contracts = self.search([

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+
+.vscode/
+.idea/
+
+*.log
+.env
+
+ngrok.exe

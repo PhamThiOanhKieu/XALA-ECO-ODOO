@@ -3,49 +3,37 @@
         <field name="name">xalaeco.dashboard.form</field>
         <field name="model">xalaeco.dashboard</field>
         <field name="arch" type="xml">
-            <form string="Dashboard XALA ECO" create="false" edit="false" delete="false">
+            <form string="Dashboard" create="false" edit="false" delete="false">
+            <style>.o_control_panel { display: none !important; }</style>
                 <sheet>
-                    <div class="oe_title">
-                        <h1>Dashboard XALA ECO</h1>
-                        <p>Trang tổng quan quản lý khách hàng, công nợ và doanh thu</p>
+                    <div class="oe_title" style="margin-bottom: 20px;">
+                        <h1>BÁO CÁO TỔNG QUAN VỀ XALA ECO</h1>
+                        <h3>ĐÂY CHỈ LÀ BẢN NHÚNG NHẰM MINH HỌA VÌ DỮ LIỆU NHÓM CHƯA ĐỒNG BỘ</h3>
                     </div>
-
-                    <group col="3">
-                        <group string="Tổng khách hàng">
-                            <field name="total_customers" readonly="1" nolabel="1"/>
-                        </group>
-
-                        <group string="Hợp đồng hiệu lực">
-                            <field name="active_contracts" readonly="1" nolabel="1"/>
-                        </group>
-
-                        <group string="Hợp đồng sắp hết hạn">
-                            <field name="near_expired_contracts" readonly="1" nolabel="1"/>
-                        </group>
-                    </group>
-
-                    <group col="3">
-                        <group string="Tổng phải thu">
-                            <field name="total_expected" readonly="1" nolabel="1"/>
-                        </group>
-
-                        <group string="Doanh thu đã thu">
-                            <field name="total_revenue" readonly="1" nolabel="1"/>
-                        </group>
-
-                        <group string="Tổng còn nợ">
-                            <field name="total_debt" readonly="1" nolabel="1"/>
-                        </group>
-                    </group>
+                    
+                    <div style="width: 100%; height: 750px; overflow: hidden;">
+                        <iframe title="DashBoard" 
+                                width="100%" 
+                                height="100%" 
+                                src="https://app.powerbi.com/reportEmbed?reportId=8fdcd28b-7cb9-48e3-b312-c67f0f608dab&amp;autoAuth=true&amp;embeddedDemo=true" 
+                                frameborder="0" 
+                                allowFullScreen="true">
+                        </iframe>
+                    </div>
                 </sheet>
             </form>
         </field>
     </record>
 
     <record id="action_xalaeco_dashboard" model="ir.actions.act_window">
+        <!-- <field name="name">Dashboard</field>
+        <field name="res_model">xalaeco.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="xalaeco_dashboard_main"/> 
+        <field name="target">current</field> -->
         <field name="name">Dashboard</field>
         <field name="res_model">xalaeco.dashboard</field>
         <field name="view_mode">form</field>
-        <field name="res_id" ref="xalaeco_dashboard_main"/>
+        <field name="target">current</field>
     </record>
 </odoo>

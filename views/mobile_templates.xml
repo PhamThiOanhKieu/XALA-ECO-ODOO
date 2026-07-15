@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TEMPLATE 1: GIAO DIỆN ĐĂNG NHẬP TRÊN ĐIỆN THOẠI -->
+    <template id="mobile_login_template" name="Mobile Login Template">
+    <html>
+        <head>
+            <title>Xala Eco - Đăng nhập</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+            <link rel="stylesheet" href="/web/static/lib/bootstrap/css/bootstrap.min.css"/>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap"/>
+            
+            <style>
+                body {
+                    background-color: #F1EAFF; 
+                    font-family: 'Inter', sans-serif;
+                    height: 100vh;
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .login-container {
+                    width: 100%;
+                    max-width: 360px; 
+                    padding: 20px;
+                }
+                .login-card {
+                    background: #ffffff;
+                    border-radius: 20px; 
+                    padding: 35px 25px;
+                    box-shadow: 0 10px 25px rgba(142, 112, 219, 0.15); 
+                }
+                .brand-logo {
+                    color: #7A1CAC; 
+                    font-size: 28px;
+                    font-weight: 700;
+                    text-align: center;
+                    margin-bottom: 5px;
+                }
+                .brand-sub {
+                    font-size: 13px;
+                    color: #8E8D9A;
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .form-control-custom {
+                    background-color: #F8F9FA;
+                    border: 1.5px solid #E9ECEF;
+                    border-radius: 12px;
+                    height: 40px;
+                    font-size: 15px;
+                    transition: all 0.3s ease;
+                }
+                .form-control-custom:focus {
+                    background-color: #ffffff;
+                    border-color: #A076F9;
+                    box-shadow: 0 0 0 3px rgba(160, 118, 249, 0.2);
+                    outline: none;
+                }
+                .btn-login {
+                    background: linear-gradient(135deg, #A076F9 0%, #7A1CAC 100%);
+                    border: none;
+                    border-radius: 12px;
+                    height: 50px;
+                    color: white;
+                    font-size: 16px;
+                    font-weight: 600;
+                    margin-top: 20px;       
+                    box-shadow: 0 4px 12px rgba(122, 28, 172, 0.3);
+                    display: block;         
+                    margin-left: auto;      
+                    margin-right: auto;     
+                    width: 80%;            
+                }
+
+                .btn-login:active {
+                    transform: scale(0.98);
+                }
+                .label-left {
+                    text-align: left;      
+                    display: block;        
+                }
+
+                .input-center {
+                    display: block;        
+                    margin: 0 auto;       
+                    width: 80%;            
+                }
+
+
+
+            </style>
+        </head>
+        <body>
+            <div class="login-container">
+                <div class="login-card animated fadeIn">
+                    <div class="brand-logo">XALA ECO</div>
+                    <div class="brand-sub">Hệ Thống Dành Cho Nhân Viên</div>
+                    
+                    
+                    <form action="/xala_mobile/login" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold text-dark mb-1 label-left">Tên đăng nhập</label>
+                            <input type="text" name="ma_nv" class="form-control form-control-custom input-center" required="required" placeholder="NV001" autocomplete="off"/>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="small font-weight-bold text-dark mb-1 label-left">Mật khẩu</label>
+                            <input type="password" name="password" class="form-control form-control-custom input-center" required="required" placeholder="••••••"/>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-login btn-block">ĐĂNG NHẬP</button>
+                    </form>
+                    <t t-if="error">
+                        <div class="alert alert-danger text-center small p-2 mb-3" 
+                            style="border-radius: 8px; color: red; text-align: center;">
+                            <span t-esc="error"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </body>
+    </html>
+</template>
+
+<template id="mobile_dashboard_template" name="Xala Mobile Dashboard">
+    <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+            <title>XALA ECO - Bảng điều khiển</title>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"/>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+            
+            <style>
+                body {
+                    background-color: #f4f6fb;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    padding-bottom: 30px;
+                }
+                .header-gradient {
+                    background: linear-gradient(135deg, #480ca8, #8843f2);
+                    border-radius: 0 0 25px 25px;
+                    padding: 30px 20px 25px 20px;
+                    color: white;
+                    margin-bottom: 25px;
+                    box-shadow: 0 4px 15px rgba(72, 12, 168, 0.2);
+                }
+                .custom-card {
+                    background: #ffffff;
+                    border-radius: 16px;
+                    padding: 20px;
+                    margin: 0 15px 20px 15px;
+                    box-shadow: 0 6px 12px rgba(0,0,0,0.03);
+                    border: none;
+                }
+                .bg-light-purple {
+                    background-color: #f2e9fe;
+                    color: #5c18c2;
+                    border-radius: 10px;
+                    font-weight: 600;
+                }
+                .text-purple { color: #5c18c2; }
+                .btn-gradient-purple {
+                    background: linear-gradient(135deg, #8843f2, #5c18c2);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    padding: 14px;
+                    font-weight: bold;
+                    width: 100%;
+                    box-shadow: 0 4px 10px rgba(92, 24, 194, 0.3);
+                }
+                .btn-gradient-purple:hover, .btn-gradient-purple:active {
+                    background: linear-gradient(135deg, #5c18c2, #480ca8);
+                    color: white;
+                }
+                .section-title {
+                    font-weight: bold;
+                    font-size: 18px;
+                    color: #2b2b2b;
+                    margin: 0 15px 15px 15px;
+                    display: flex;
+                    align-items: center;
+                }
+                .section-title i {
+                    background: #f2e9fe;
+                    color: #5c18c2;
+                    width: 32px; height: 32px;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 10px;
+                    font-size: 14px;
+                }
+                .icon-circle-right {
+                    width: 40px; height: 40px;
+                    background: #f2e9fe;
+                    color: #5c18c2;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                }
+                .route-box {
+                    background: #f4f0fa;
+                    color: #4b0da6;
+                    font-weight: bold;
+                    padding: 12px 15px;
+                    border-radius: 12px;
+                    margin: 10px 0;
+                    font-size: 15px;
+                }
+            </style>
+        </head>
+        
+        <body>
+            <div class="header-gradient">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="font-weight-bold mb-0" style="font-size: 24px; letter-spacing: 1px;">XALA ECO</h2>
+                    <a href="/xala_mobile/logout" class="text-white small text-decoration-none">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </div>
+                <div style="font-size: 16px; opacity: 0.9;">
+                    Chào, <t t-esc="employee.employee_name or employee.name or 'Nhân viên'"/> 👋
+                </div>
+            </div>
+
+            <div class="custom-card mb-3 py-3 d-flex justify-content-between align-items-center">
+                <span class="font-weight-bold text-dark"><i class="far fa-calendar-alt text-purple mr-2"></i>Ngày làm việc:</span>
+                <input type="date" class="form-control form-control-sm w-auto border-0 bg-light-purple px-2" 
+                       t-att-value="current_date" 
+                       onchange="window.location.href='/xala_mobile/dashboard?filter_date=' + this.value;"/>
+            </div>
+
+            <t t-if="not work_histories">
+                <div class="custom-card text-center py-5 text-muted">
+                    <i class="fas fa-box-open fa-3x mb-3" style="color: #e0d4f5;"></i>
+                    <p class="mb-0">Không có ca làm việc nào trong ngày này.</p>
+                </div>
+            </t>
+
+            <t t-if="work_histories">
+                
+                <div class="section-title"><i class="far fa-calendar-alt"></i> Danh sách ca</div>
+                
+                <t t-foreach="work_histories" t-as="history">
+                    <div class="custom-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="bg-light-purple py-1 px-3 d-inline-block small">
+                                <i class="far fa-calendar mr-1"></i> <t t-esc="current_date"/>
+                            </div>
+                            <div class="icon-circle-right">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                        </div>
+                        
+                        <h5 class="font-weight-bold text-dark mb-2" style="font-size: 17px;">
+                            <t t-esc="history['shift_type_str']"/>
+                            <t t-if="history['state'] == 'draft'"><span class="text-warning ml-1">Chưa bắt đầu</span></t>
+                            <t t-if="history['state'] == 'in_progress'"><span class="text-purple ml-1">Đang thực hiện</span></t>
+                        </h5>
+                        
+                        <div class="small text-muted mb-1">Tuyến đường thu gom:</div>
+                        <div class="route-box">
+                            <t t-esc="history['route_name']"/>
+                        </div>
+
+                        <div style="height: 400px; width: 100%; border-radius: 12px; margin-top: 15px; overflow: hidden; border: 1px solid #e0d4f5; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                           <iframe width="100%" height="100%" t-attf-src="/xala_eco/map_view?is_mobile=1&amp;emp_code=#{employee.employee_code}" frameborder="0" style="border: none;"></iframe>
+                        </div>
+                        <div class="text-muted small mt-3 d-flex align-items-center">
+                            <i class="far fa-clock mr-2"></i> Ngày phân công: <t t-esc="history['date_assigned']"/>
+                        </div>
+                    </div>
+                </t>
+
+                <div class="section-title mt-4"><i class="fas fa-chart-bar"></i> Bảng điều khiển chấm công</div>
+                
+                <t t-foreach="work_histories" t-as="history">
+                    <div class="custom-card">
+                        <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+                            <div class="icon-circle-right mr-3" style="min-width: 40px;">
+                                <i class="far fa-id-badge"></i>
+                            </div>
+                            <div class="font-weight-bold text-dark" style="font-size: 15px; line-height: 1.3;">
+                                <t t-esc="history['shift_type_str']"/> - <t t-esc="history['route_name']"/>
+                            </div>
+                        </div>
+                        
+                        <div t-attf-id="mobileMapContainer_#{history['id']}" style="display:none; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                            <iframe t-attf-id="mobileLiveMap_#{history['id']}" width="100%" height="200" frameborder="0" style="border:0;" allowfullscreen="1"></iframe>
+                        </div>
+
+                        <t t-if="history['state'] == 'draft'">
+                            <p class="small text-muted mb-3" style="line-height: 1.5;">Bạn chưa bắt đầu ca trực. Bấm nút dưới đây để chụp ảnh tại vị trí xuất phát.</p>
+                            <input type="file" t-attf-id="cameraInput_#{history['id']}" accept="image/*" capture="environment" style="display:none;"/>
+                            <button class="btn btn-gradient-purple" t-attf-onclick="$('#cameraInput_#{history['id']}').click();">
+                                <i class="fas fa-camera mr-2"></i> BẮT ĐẦU CA (CHECK-IN)
+                            </button>
+                        </t>
+                        
+                        <t t-if="history['state'] == 'in_progress'">
+                            <div class="alert alert-success p-2 small text-center mb-3" style="border-radius: 10px; background-color: #e8f5e9; color: #2e7d32; border: none;">
+                                <i class="fas fa-check-circle mr-1"></i> Đã bắt đầu ca lúc: <b style="font-size: 14px;"><t t-esc="history['start_time_str']"/></b>
+                            </div>
+
+                            <p class="small text-muted mb-3" style="line-height: 1.5;">Bạn đang trong ca trực. Bấm nút dưới đây để chụp ảnh báo cáo hoàn thành tuyến đường.</p>
+                            <input type="file" t-attf-id="cameraInput_#{history['id']}" accept="image/*" capture="environment" style="display:none;"/>
+                            <button class="btn btn-gradient-purple" t-attf-onclick="$('#cameraInput_#{history['id']}').click();">
+                                <i class="fas fa-camera mr-2"></i> KẾT THÚC CA (CHECK-OUT)
+                            </button>
+                        </t>
+                    </div>
+                </t>
+            </t>
+
+            <script type="text/javascript">
+            //<![CDATA[
+                $(document).ready(function() {
+                    // Hàm tự động gửi tọa độ lên máy chủ
+                    function sendGPSUpdate(lat, lng) {
+                        $.ajax({
+                            url: '/xala_mobile/update_gps',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                jsonrpc: "2.0",
+                                params: {
+                                    lat_lng: "Vĩ độ: " + lat + ", Kinh độ: " + lng
+                                }
+                            }),
+                            success: function(response) {
+                                console.log("Gửi định vị tự động thành công:", response);
+                            },
+                            error: function(err) {
+                                console.error("Lỗi gửi định vị tự động:", err);
+                            }
+                        });
+                    }
+
+                    // Logic xin quyền GPS và load bản đồ tự động
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(p){
+                            var lat = p.coords.latitude;
+                            var lng = p.coords.longitude;
+                            // Nhờ có CDATA, ta cứ dùng dấu & thoải mái
+                            var mapUrl = "https://maps.google.com/maps?q=" + lat + "," + lng + "&z=16&output=embed";
+                            
+                            $('[id^="mobileLiveMap_"]').attr('src', mapUrl);
+                            $('[id^="mobileMapContainer_"]').fadeIn();
+
+                            // Gửi ngay tọa độ ban đầu
+                            sendGPSUpdate(lat, lng);
+                        }, function(error) {
+                            console.log("GPS Error: ", error);
+                        }, { enableHighAccuracy: true });
+
+                        // Lắng nghe di chuyển của nhân viên thời gian thực
+                        navigator.geolocation.watchPosition(function(p) {
+                            sendGPSUpdate(p.coords.latitude, p.coords.longitude);
+                        }, function(error) {
+                            console.log("GPS Watch Error: ", error);
+                        }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 });
+
+                        // Gửi dự phòng mỗi 15 giây
+                        setInterval(function() {
+                            navigator.geolocation.getCurrentPosition(function(p) {
+                                sendGPSUpdate(p.coords.latitude, p.coords.longitude);
+                            }, function(e) {}, { enableHighAccuracy: true });
+                        }, 15000);
+                    }
+
+                    // Logic lắng nghe sự kiện chụp ảnh
+                    $('input[type="file"]').on('change', function(e) {
+                        var file = e.target.files[0];
+                        if (!file) return;
+                        
+                        var inputId = $(this).attr('id');
+                        var historyId = inputId.split('_')[1];
+                        var actionType = $(this).siblings('button').text().includes('BẮT ĐẦU') ? 'check_in' : 'check_out';
+                        
+                        var reader = new FileReader();
+                        reader.onload = function(event) {
+                            var base64Image = event.target.result;
+                            
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(function(position) {
+                                    var lat_lng = "Vĩ độ: " + position.coords.latitude + ", Kinh độ: " + position.coords.longitude;
+                                    
+                                    $.ajax({
+                                        url: '/xala_mobile/submit_attendance',
+                                        type: 'POST',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify({
+                                            jsonrpc: "2.0",
+                                            params: {
+                                                history_id: historyId,
+                                                action_type: actionType,
+                                                lat_lng: lat_lng,
+                                                image_base64: base64Image
+                                            }
+                                        }),
+                                        success: function(response) {
+                                            // Dùng && thoải mái không sợ lỗi
+                                            if(response.result && response.result.status === 'success') {
+                                                alert("Chấm công thành công!");
+                                                location.reload();
+                                            } else {
+                                                alert("Lỗi: " + (response.result ? response.result.message : "Không xác định"));
+                                            }
+                                        }
+                                    });
+                                }, function(error) {
+                                    alert("Không thể lấy tọa độ GPS. Vui lòng bật định vị trên điện thoại!");
+                                }, { enableHighAccuracy: true });
+                            } else {
+                                alert("Trình duyệt không hỗ trợ GPS.");
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                });
+            //]]>
+            </script>
+        </body>
+    </html>
+</template>
+</odoo>
