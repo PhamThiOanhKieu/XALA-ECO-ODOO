@@ -110,11 +110,13 @@ class XalaEcoBilling(models.Model):
             '''
 
 from odoo import models, fields, api
+from markupsafe import Markup
 
 
 class XalaEcoBilling(models.Model):
     _name = 'xalaeco.billing'
     _description = 'Kỳ thu phí XALA ECO'
+    _inherit = ['mail.thread']
 
     name = fields.Char(string='Tên kỳ thu phí', required=True)
 
@@ -180,7 +182,7 @@ class XalaEcoBilling(models.Model):
 
                 contract = self.env['xalaeco.contract'].search([
                     ('customer_id', '=', customer.id),
-                    ('state', 'in', ['active', 'near_expired']),
+                    ('state', '=', 'active'),
                 ], limit=1)
 
                 amount_due = contract.service_fee if contract else customer.monthly_fee
@@ -191,7 +193,6 @@ class XalaEcoBilling(models.Model):
                     'billing_id': billing.id,
                     'amount_due': amount_due,
                     'amount_paid': 0,
-                    'payment_method': 'bank',
                     'note': 'Sinh từ hợp đồng xuất hóa đơn' if contract else 'Sinh từ phí hộ dân/tháng',
                 })
 
@@ -209,3 +210,39 @@ class XalaEcoBilling(models.Model):
     def action_close_period(self):
         for record in self:
             record.state = 'closed'
+
+    def action_send_sms_notification(self):
+        self.ensure_one()
+        ICP = self.env['ir.config_parameter'].sudo()
+        base_url = ICP.get_param('web.base.url')
+
+        count = 0
+        for payment in self.payment_ids:
+            customer = payment.customer_id
+            pay_url = f"{base_url}/payment/vnpay_direct/{payment.id}"
+            phone = customer.phone or 'Chưa có SĐT'
+            amount_fmt = f"{int(payment.amount_due):,}"
+
+            body = (
+                f"<p><strong>📨 Thông báo gửi đến: {customer.name} | {phone}</strong></p>"
+                f"<p>Kính gửi khách hàng <strong>{customer.name}</strong>, "
+                f"phí thu gom rác tháng <strong>{self.month}/{self.year}</strong> "
+                f"của quý khách là <strong>{amount_fmt} VNĐ</strong>. "
+                f"Quý khách có thể thanh toán trực tuyến tại: "
+                f"<a href='{pay_url}' target='_blank'>🔗 Link thanh toán VNPay</a>. "
+                f"Trường hợp chưa thanh toán trực tuyến, chủ đơn vị sẽ đến thu phí "
+                f"trực tiếp theo lịch thu phí. Xin cảm ơn.</p>"
+            )
+            self.message_post(body=Markup(body), message_type='comment', subtype_xmlid='mail.mt_note')
+            count += 1
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': f'✅ Đã gửi thông báo đến {count} khách hàng',
+                'message': 'Chi tiết từng tin nhắn được lưu trong phần Nhật ký trao đổi bên dưới.',
+                'type': 'success',
+                'sticky': False,
+            }
+        }
