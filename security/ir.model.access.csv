@@ -4,7 +4,3 @@ access_xalaeco_contract,xalaeco.contract,model_xalaeco_contract,base.group_user,
 access_xalaeco_billing,xalaeco.billing,model_xalaeco_billing,base.group_user,1,1,1,1
 access_xalaeco_payment,xalaeco.payment,model_xalaeco_payment,base.group_user,1,1,1,1
 access_xalaeco_dashboard,xalaeco.dashboard,model_xalaeco_dashboard,base.group_user,1,1,1,1
-access_xala_employee,xala.employee,model_xala_employee,base.group_user,1,1,1,1
-access_xala_work_history,xala.work.history,model_xala_work_history,base.group_user,1,1,1,1
-access_xala_shift,xala.shift,model_xala_shift,base.group_user,1,1,1,1
-access_xala_employee_map,xala.employee.map,model_xala_employee_map,base.group_user,1,1,1,1

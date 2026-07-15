@@ -1,8 +1,12 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 from datetime import date
 import urllib.parse
 import base64
 import requests
+
+from . import vnpay_utils
+
 
 class XalaEcoPayment(models.Model):
     _name = 'xalaeco.payment'
@@ -21,8 +25,8 @@ class XalaEcoPayment(models.Model):
     payment_date = fields.Date(string='Ngày thanh toán')
     payment_method = fields.Selection([
         ('cash', 'Tiền mặt'),
-        ('bank', 'Chuyển khoản QR'),
-    ], string='Phương thức thanh toán', default='bank')
+        ('vnpay', 'Thanh toán VNPay'),
+    ], string='Phương thức thanh toán')
 
     bank_transaction_code = fields.Char(string='Mã giao dịch ngân hàng')
     bank_code = fields.Char(string='Mã ngân hàng', default='VCB')
@@ -33,6 +37,8 @@ class XalaEcoPayment(models.Model):
     qr_url = fields.Char(string='Link VietQR', compute='_compute_qr_url', store=True)
     qr_image = fields.Binary(string='QR thanh toán', compute='_compute_qr_image', store=True)
 
+    vnp_txn_ref = fields.Char(string='Mã giao dịch VNPay (TxnRef)', copy=False)
+    
     state = fields.Selection([
         ('unpaid', 'Chưa thanh toán'),
         ('partial', 'Thanh toán một phần'),
@@ -110,6 +116,7 @@ class XalaEcoPayment(models.Model):
         for record in self:
             record.amount_paid = record.amount_due
             record.payment_date = date.today()
+            record.payment_method = 'cash'
             record.note = 'Đã xác nhận thu đủ tiền.'
         return True
 
@@ -118,5 +125,46 @@ class XalaEcoPayment(models.Model):
             record.amount_paid = 0
             record.payment_date = False
             record.bank_transaction_code = False
+            record.payment_method = False
             record.note = 'Đã đưa về trạng thái chưa thanh toán.'
         return True
+    
+
+    def action_pay_vnpay(self):
+        self.ensure_one()
+        ICP = self.env['ir.config_parameter'].sudo()
+        tmn_code = ICP.get_param('xalaeco.vnp_tmn_code')
+        secret_key = ICP.get_param('xalaeco.vnp_hash_secret')
+        vnp_url = ICP.get_param('xalaeco.vnp_url', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html')
+        base_url = ICP.get_param('web.base.url')
+
+        if not tmn_code or not secret_key:
+            raise UserError('Chưa cấu hình vnp_TmnCode hoặc vnp_HashSecret. Vào Settings > Technical > System Parameters để thêm.')
+
+        from datetime import datetime
+        now = datetime.now()
+        txn_ref = now.strftime('%d%H%M%S')
+        self.vnp_txn_ref = txn_ref
+
+        vnp_params = {
+            'vnp_Version': '2.1.0',
+            'vnp_Command': 'pay',
+            'vnp_TmnCode': tmn_code,
+            'vnp_Locale': 'vn',
+            'vnp_CurrCode': 'VND',
+            'vnp_TxnRef': txn_ref,
+            'vnp_OrderInfo': f'Thanh toan cho ma GD:{txn_ref}',
+            'vnp_OrderType': 'other',
+            'vnp_Amount': int((self.debt_amount or 0) * 100),
+            'vnp_ReturnUrl': f'{base_url}/payment/vnpay_return?db=xala_chuan',
+            'vnp_IpAddr': '127.0.0.1',
+            'vnp_CreateDate': now.strftime('%Y%m%d%H%M%S'),
+        }
+
+        payment_url = vnpay_utils.build_payment_url(vnp_params, secret_key, vnp_url)
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': payment_url,
+            'target': 'self',
+        }
