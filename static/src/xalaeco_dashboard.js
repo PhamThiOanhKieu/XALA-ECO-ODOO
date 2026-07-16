@@ -5,7 +5,7 @@ import { Component, xml } from "@odoo/owl";
 
 class XalaEcoDashboard extends Component {
     setup() {
-        this.powerBiUrl = "https://app.powerbi.com/reportEmbed?reportId=182fc8e4-a47d-45dc-b0c8-80a9eddac22b&autoAuth=true&ctid=14d5de2b-d212-4175-92d5-156ea5b7c037";
+        this.powerBiUrl = "https://app.powerbi.com/reportEmbed?reportId=8fdcd28b-7cb9-48e3-b312-c67f0f608dab&autoAuth=true&ctid=14d5de2b-d212-4175-92d5-156ea5b7c037";
     }
 }
 
