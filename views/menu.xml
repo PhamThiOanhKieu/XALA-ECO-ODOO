@@ -4,7 +4,7 @@
     <menuitem id="menu_xalaeco_dashboard"
               name="Dashboard"
               parent="menu_xalaeco_root"
-              action="action_xalaeco_dashboard"
+              action="action_xalaeco_dashboard_owl"
               sequence="1"/>
 
     <menuitem id="menu_xalaeco_customer"

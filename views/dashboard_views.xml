@@ -1,39 +1,7 @@
 <odoo>
-    <record id="view_xalaeco_dashboard_form" model="ir.ui.view">
-        <field name="name">xalaeco.dashboard.form</field>
-        <field name="model">xalaeco.dashboard</field>
-        <field name="arch" type="xml">
-            <form string="Dashboard" create="false" edit="false" delete="false">
-            <style>.o_control_panel { display: none !important; }</style>
-                <sheet>
-                    <div class="oe_title" style="margin-bottom: 20px;">
-                        <h1>BÁO CÁO TỔNG QUAN VỀ XALA ECO</h1>
-                        <h3>ĐÂY CHỈ LÀ BẢN NHÚNG NHẰM MINH HỌA VÌ DỮ LIỆU NHÓM CHƯA ĐỒNG BỘ</h3>
-                    </div>
-                    
-                    <div style="width: 100%; height: 750px; overflow: hidden;">
-                        <iframe title="DashBoard" 
-                                width="100%" 
-                                height="100%" 
-                                src="https://app.powerbi.com/reportEmbed?reportId=8fdcd28b-7cb9-48e3-b312-c67f0f608dab&amp;autoAuth=true&amp;embeddedDemo=true" 
-                                frameborder="0" 
-                                allowFullScreen="true">
-                        </iframe>
-                    </div>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <record id="action_xalaeco_dashboard" model="ir.actions.act_window">
-        <!-- <field name="name">Dashboard</field>
-        <field name="res_model">xalaeco.dashboard</field>
-        <field name="view_mode">form</field>
-        <field name="res_id" ref="xalaeco_dashboard_main"/> 
-        <field name="target">current</field> -->
+    <record id="action_xalaeco_dashboard_owl" model="ir.actions.client">
         <field name="name">Dashboard</field>
-        <field name="res_model">xalaeco.dashboard</field>
-        <field name="view_mode">form</field>
+        <field name="tag">xalaeco_dashboard_owl</field>
         <field name="target">current</field>
     </record>
 </odoo>

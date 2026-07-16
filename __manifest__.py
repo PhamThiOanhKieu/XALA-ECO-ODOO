@@ -20,6 +20,11 @@
         'views/menu.xml',
         'views/mobile_templates.xml', 
     ],
+    'assets': {
+        'web.assets_backend': [
+            'XALA-ECO-ODOO/static/src/xalaeco_dashboard.js',
+        ],
+    },
     'installable': True,
     'application': True,
 }
