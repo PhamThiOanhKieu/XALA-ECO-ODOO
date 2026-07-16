@@ -15,6 +15,7 @@
         'views/contract_views.xml',
         'views/billing_views.xml',
         'views/payment_views.xml',
+        'views/hr_management_views.xml',
         'views/dashboard_views.xml',
         'views/employee_map_views.xml',
         'views/menu.xml',

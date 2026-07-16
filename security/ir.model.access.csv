@@ -1,4 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xala_employee,xala.employee,model_xala_employee,base.group_user,1,1,1,1
+access_xala_shift,xala.shift,model_xala_shift,base.group_user,1,1,1,1
+access_xala_work_history,xala.work_history,model_xala_work_history,base.group_user,1,1,1,1
+access_xala_employee_map,xala.employee.map,model_xala_employee_map,base.group_user,1,1,1,1
 access_xalaeco_customer,xalaeco.customer,model_xalaeco_customer,base.group_user,1,1,1,1
 access_xalaeco_contract,xalaeco.contract,model_xalaeco_contract,base.group_user,1,1,1,1
 access_xalaeco_billing,xalaeco.billing,model_xalaeco_billing,base.group_user,1,1,1,1
