@@ -26,6 +26,12 @@
                             type="object"
                             class="btn-primary"/>
 
+                    <button name="action_send_sms_notification"
+                            string="Gửi thông báo thu phí"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'collecting'"/>
+
                     <button name="action_close_period"
                             string="Chốt kỳ thu phí"
                             type="object"
@@ -64,6 +70,9 @@
                         </page>
                     </notebook>
                  </sheet>
+
+                 <chatter/>
+
             </form>
         </field>
     </record>

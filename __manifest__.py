@@ -17,12 +17,14 @@
         'views/payment_views.xml',
         'views/hr_management_views.xml',
         'views/dashboard_views.xml',
+        'views/dashboard_views2.xml',
         'views/employee_map_views.xml',
         'views/menu.xml',
         'views/mobile_templates.xml', 
     ],
     'assets': {
         'web.assets_backend': [
+            # 'xalaeco_management/static/src/xalaeco_dashboard.js',
             'XALA-ECO-ODOO/static/src/xalaeco_dashboard.js',
         ],
     },

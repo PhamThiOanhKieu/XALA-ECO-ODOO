@@ -2,7 +2,7 @@
     <menuitem id="menu_xalaeco_root" name="XALA ECO" sequence="1"/>
 
     <menuitem id="menu_xalaeco_dashboard"
-              name="Dashboard"
+              name="Tổng quan"
               parent="menu_xalaeco_root"
               action="action_xalaeco_dashboard_owl"
               sequence="1"/>
@@ -75,6 +75,6 @@
     <menuitem id="menu_xalaeco_revenue_report"
               name="Báo cáo doanh thu"
               parent="menu_xalaeco_revenue_root"
-              action="action_xalaeco_revenue_report"
+              action="action_xalaeco_revenue_dashboard_owl"
               sequence="4"/>
 </odoo>

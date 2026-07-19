@@ -7,7 +7,6 @@ import requests
 
 from . import vnpay_utils
 
-
 class XalaEcoPayment(models.Model):
     _name = 'xalaeco.payment'
     _description = 'Thanh toán QR và công nợ XALA ECO'
@@ -35,7 +34,8 @@ class XalaEcoPayment(models.Model):
 
     transfer_content = fields.Char(string='Nội dung chuyển khoản', compute='_compute_transfer_content', store=True)
     qr_url = fields.Char(string='Link VietQR', compute='_compute_qr_url', store=True)
-    qr_image = fields.Binary(string='QR thanh toán', compute='_compute_qr_image', store=True)
+    # GEMINI_NOTE: Đổi store=True thành store=False để Odoo không gửi 500+ request tải ảnh QR đồng thời khi sinh công nợ
+    qr_image = fields.Binary(string='QR thanh toán', compute='_compute_qr_image', store=False)
 
     vnp_txn_ref = fields.Char(string='Mã giao dịch VNPay (TxnRef)', copy=False)
     
@@ -93,14 +93,8 @@ class XalaEcoPayment(models.Model):
     @api.depends('qr_url')
     def _compute_qr_image(self):
         for record in self:
+            # GEMINI_NOTE: Vô hiệu hóa tải ảnh VietQR bằng requests.get vì hệ thống chuyển sang dùng VNPay
             record.qr_image = False
-            if record.qr_url:
-                try:
-                    response = requests.get(record.qr_url, timeout=10)
-                    if response.status_code == 200:
-                        record.qr_image = base64.b64encode(response.content)
-                except Exception:
-                    record.qr_image = False
 
     @api.depends('amount_due', 'amount_paid')
     def _compute_state(self):
