@@ -10,6 +10,6 @@ from . import contract_map
 from . import payment_map
 
 ################################################################################
-#note: IMPORT TIỆN ÍCH MÃ HÓA VÀ KÝ CHỮ KÝ MOMO
+# GEMINI_NOTE: IMPORT TIỆN ÍCH MÃ HÓA VÀ KÝ CHỮ KÝ MOMO
 ################################################################################
 from . import momo_utils

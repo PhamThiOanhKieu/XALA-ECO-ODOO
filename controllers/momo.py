@@ -132,11 +132,13 @@ class MoMoController(http.Controller):
                 <p>Mã hóa đơn giao dịch: {order_id or ''}</p>
                 <p>Mã tham chiếu MoMo: {trans_id or ''}</p>
                 <br/>
+                <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
                 <a href="/odoo/action-93" 
                    style="background-color: #A50064; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-weight: bold;">
                     Quay lại Odoo
                 </a>
+                <!-- --------Hết---------- -->
             </body>
         </html>
         """

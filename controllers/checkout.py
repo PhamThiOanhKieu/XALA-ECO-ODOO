@@ -33,7 +33,9 @@ class CheckoutController(http.Controller):
                     <div class="card">
                         <h1>✓ Đã Thanh Toán</h1>
                         <p>Hóa đơn <strong>#""" + str(payment.name) + """</strong> đã hoàn tất thanh toán trước đó.</p>
+                        <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
                         <a href="/odoo/action-93">Quay lại Odoo</a>
+                        <!-- --------Hết---------- -->
                     </div>
                 </body>
             </html>
