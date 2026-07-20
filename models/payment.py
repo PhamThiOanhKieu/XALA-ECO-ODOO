@@ -7,6 +7,7 @@ import requests
 
 from . import vnpay_utils
 
+
 class XalaEcoPayment(models.Model):
     _name = 'xalaeco.payment'
     _description = 'Thanh toán QR và công nợ XALA ECO'
@@ -34,10 +35,13 @@ class XalaEcoPayment(models.Model):
 
     transfer_content = fields.Char(string='Nội dung chuyển khoản', compute='_compute_transfer_content', store=True)
     qr_url = fields.Char(string='Link VietQR', compute='_compute_qr_url', store=True)
-    # GEMINI_NOTE: Đổi store=True thành store=False để Odoo không gửi 500+ request tải ảnh QR đồng thời khi sinh công nợ
     qr_image = fields.Binary(string='QR thanh toán', compute='_compute_qr_image', store=False)
 
     vnp_txn_ref = fields.Char(string='Mã giao dịch VNPay (TxnRef)', copy=False)
+    
+    # CHỈNH SỬA NGÀY 20/07/2026: Thêm trường lưu mã giao dịch MoMo Sandbox
+    momo_txn_ref = fields.Char(string='Mã giao dịch MoMo (TxnRef)', copy=False)
+    #--------Hết----------
     
     state = fields.Selection([
         ('unpaid', 'Chưa thanh toán'),
@@ -93,7 +97,6 @@ class XalaEcoPayment(models.Model):
     @api.depends('qr_url')
     def _compute_qr_image(self):
         for record in self:
-            # GEMINI_NOTE: Vô hiệu hóa tải ảnh VietQR bằng requests.get vì hệ thống chuyển sang dùng VNPay
             record.qr_image = False
 
     @api.depends('amount_due', 'amount_paid')
@@ -162,3 +165,32 @@ class XalaEcoPayment(models.Model):
             'url': payment_url,
             'target': 'self',
         }
+
+    # CHỈNH SỬA NGÀY 20/07/2026: Hàm xử lý nút bấm chuyển hướng thanh toán qua MoMo Sandbox
+    def action_pay_momo(self):
+        self.ensure_one()
+        ICP = self.env['ir.config_parameter'].sudo()
+        base_url = ICP.get_param('web.base.url')
+        
+        # Chuyển hướng trình duyệt đến controller xử lý thanh toán MoMo của Odoo
+        payment_url = f"{base_url}/payment/momo_direct/{self.id}"
+        
+        return {
+            'type': 'ir.actions.act_url',
+            'url': payment_url,
+            'target': 'self',
+        }
+    #--------Hết----------
+
+    # ###############################################################################
+    # CHỈNH SỬA NGÀY 20/07/2026: HÀM ĐIỀU HƯỚNG SANG TRANG THANH TOÁN CHUNG (CHECKOUT)
+    # ###############################################################################
+    def action_pay_online(self):
+        self.ensure_one()
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f"{base_url}/payment/checkout/{self.id}",
+            'target': 'self',
+        }
+    #--------Hết----------

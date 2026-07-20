@@ -61,7 +61,7 @@
               sequence="1"/>
 
     <menuitem id="menu_xalaeco_payment"
-              name="Thanh toán QR"
+              name="Thanh toán"
               parent="menu_xalaeco_revenue_root"
               action="action_xalaeco_payment"
               sequence="2"/>

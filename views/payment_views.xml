@@ -22,11 +22,15 @@
         <field name="arch" type="xml">
             <form string="Thanh toán VNPay">
                 <header>
-                    <button name="action_pay_vnpay"
-                            string="Thanh toán VNPay"
+                    <!-- ======================================================= -->
+                    <!-- CHỈNH SỬA NGÀY 20/07/2026: NÚT BẤM THANH TOÁN ONLINE GỘP CỔNG -->
+                    <!-- ======================================================= -->
+                    <button name="action_pay_online"
+                            string="Thanh toán TKNH"
                             type="object"
                             class="btn-primary"
                             invisible="state == 'paid'"/>
+                    <!-- ======================================================= -->
                     <button name="action_confirm_paid"
                             string="Xác nhận đã thu"
                             type="object"

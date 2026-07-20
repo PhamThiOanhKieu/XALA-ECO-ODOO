@@ -865,7 +865,7 @@ class VNPayController(http.Controller):
                 <h1 style="color: {'green' if success else 'red'};">{message}</h1>
                 <p>Mã giao dịch: {txn_ref or ''}</p>
                 <br/>
-                <a href="/odoo/xalaeco-payment" 
+                <a href="/odoo/action-93" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo

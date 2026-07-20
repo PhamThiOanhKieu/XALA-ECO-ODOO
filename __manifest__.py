@@ -24,8 +24,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            # 'xalaeco_management/static/src/xalaeco_dashboard.js',
-            'XALA-ECO-ODOO/static/src/xalaeco_dashboard.js',
+            'xala_eco_odoo/static/src/xalaeco_dashboard.js',
         ],
     },
     'installable': True,

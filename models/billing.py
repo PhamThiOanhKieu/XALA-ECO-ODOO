@@ -219,19 +219,20 @@ class XalaEcoBilling(models.Model):
         count = 0
         for payment in self.payment_ids:
             customer = payment.customer_id
-            pay_url = f"{base_url}/payment/vnpay_direct/{payment.id}"
+            # CHỈNH SỬA NGÀY 20/07/2026: Đổi link sang trang checkout trung gian
+            pay_url = f"{base_url}/payment/checkout/{payment.id}"
             phone = customer.phone or 'Chưa có SĐT'
             amount_fmt = f"{int(payment.amount_due):,}"
 
+            # CHỈNH SỬA NGÀY 20/07/2026: Thay đổi câu kết thúc tin nhắn sang thông báo bỏ qua nếu trả tiền mặt
             body = (
                 f"<p><strong>📨 Thông báo gửi đến: {customer.name} | {phone}</strong></p>"
                 f"<p>Kính gửi khách hàng <strong>{customer.name}</strong>, "
                 f"phí thu gom rác tháng <strong>{self.month}/{self.year}</strong> "
                 f"của quý khách là <strong>{amount_fmt} VNĐ</strong>. "
                 f"Quý khách có thể thanh toán trực tuyến tại: "
-                f"<a href='{pay_url}' target='_blank'>🔗 Link thanh toán VNPay</a>. "
-                f"Trường hợp chưa thanh toán trực tuyến, chủ đơn vị sẽ đến thu phí "
-                f"trực tiếp theo lịch thu phí. Xin cảm ơn.</p>"
+                f"<a href='{pay_url}' target='_blank'>🔗 Cổng thanh toán trực tuyến</a>. "
+                f"Nếu quý khách hàng thanh toán bằng tiền mặt xin vui lòng bỏ qua tin nhắn này. Xin cảm ơn.</p>"
             )
             self.message_post(body=Markup(body), message_type='comment', subtype_xmlid='mail.mt_note')
             count += 1
