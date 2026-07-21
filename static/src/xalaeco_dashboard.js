@@ -8,7 +8,7 @@ import { Component, xml } from "@odoo/owl";
 // ==========================================
 class XalaEcoDashboard extends Component {
     setup() {
-        this.powerBiUrl = "https://app.powerbi.com/reportEmbed?reportId=8fdcd28b-7cb9-48e3-b312-c67f0f608dab&autoAuth=true&ctid=14d5de2b-d212-4175-92d5-156ea5b7c037&pageName=3898b735dced26b6a1e0&navContentPaneEnabled=false";
+        this.powerBiUrl = "https://app.powerbi.com/reportEmbed?reportId=2e05c0fb-dde0-4f00-905e-184ad350cbbb&autoAuth=true&pageName=3898b735dced26b6a1e0&navContentPaneEnabled=false&language=vi-VN";
     }
 }
 
@@ -30,7 +30,7 @@ registry.category("actions").add("xalaeco_dashboard_owl", XalaEcoDashboard);
 // ==========================================
 class XalaEcoRevenueDashboard extends Component {
     setup() {
-                this.powerBiUrl = "https://app.powerbi.com/reportEmbed?reportId=8fdcd28b-7cb9-48e3-b312-c67f0f608dab&autoAuth=true&ctid=14d5de2b-d212-4175-92d5-156ea5b7c037&pageName=754617426c462ce4e59e&navContentPaneEnabled=false";
+        this.powerBiUrl = "https://app.powerbi.com/reportEmbed?reportId=2e05c0fb-dde0-4f00-905e-184ad350cbbb&autoAuth=true&pageName=754617426c462ce4e59ee&navContentPaneEnabled=false&language=vi-VN";
 
     }
 }
