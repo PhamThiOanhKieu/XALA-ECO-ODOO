@@ -4,6 +4,7 @@ from datetime import date
 import urllib.parse
 import base64
 import requests
+import json
 
 from . import vnpay_utils
 
@@ -24,9 +25,11 @@ class XalaEcoPayment(models.Model):
 
     payment_date = fields.Date(string='Ngày thanh toán')
     payment_method = fields.Selection([
-        ('cash', 'Tiền mặt'),
-        ('vnpay', 'Thanh toán VNPay'),
-    ], string='Phương thức thanh toán')
+    ('cash', 'Tiền mặt'),
+    ('vnpay', 'VNPay'),
+    ('momo', 'MoMo'),
+    ('sepay', 'SePay'),
+    ], string="Phương thức")
 
     bank_transaction_code = fields.Char(string='Mã giao dịch ngân hàng')
     bank_code = fields.Char(string='Mã ngân hàng', default='VCB')
@@ -42,7 +45,15 @@ class XalaEcoPayment(models.Model):
     # CHỈNH SỬA NGÀY 20/07/2026: Thêm trường lưu mã giao dịch MoMo Sandbox
     momo_txn_ref = fields.Char(string='Mã giao dịch MoMo (TxnRef)', copy=False)
     #--------Hết----------
-    
+    sepay_order_id = fields.Char(copy=False)
+    sepay_order_code = fields.Char(copy=False)
+    sepay_va_number = fields.Char(copy=False)
+    sepay_qr = fields.Binary("QR SePay", attachment=True)
+
+    sepay_expired_at = fields.Datetime(string="Hết hạn SePay", copy=False)
+    sepay_status = fields.Char(string="Trạng thái SePay", copy=False)
+
+
     state = fields.Selection([
         ('unpaid', 'Chưa thanh toán'),
         ('partial', 'Thanh toán một phần'),
@@ -193,4 +204,13 @@ class XalaEcoPayment(models.Model):
             'url': f"{base_url}/payment/checkout/{self.id}",
             'target': 'self',
         }
-    #--------Hết----------
+    
+    def action_pay_sepay(self):
+        self.ensure_one()
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+
+        return {
+        "type": "ir.actions.act_url",
+        "url": f"{base_url}/payment/sepay_direct/{self.id}",
+        "target": "self",
+    }

@@ -52,7 +52,7 @@ class VNPayController(http.Controller):
                 <p>Mã giao dịch: {txn_ref or ''}</p>
                 <br/>
                 <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
-                <a href="/odoo/action-93" 
+                <a href="/odoo/action-156" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo

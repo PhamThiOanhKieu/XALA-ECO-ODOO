@@ -6,7 +6,7 @@
 from odoo import http
 from odoo.http import request
 import urllib.parse
-
+import requests
 class CheckoutController(http.Controller):
 
     @http.route('/payment/checkout/<int:payment_id>', type='http', auth='public', csrf=False)
@@ -34,7 +34,7 @@ class CheckoutController(http.Controller):
                         <h1>✓ Đã Thanh Toán</h1>
                         <p>Hóa đơn <strong>#""" + str(payment.name) + """</strong> đã hoàn tất thanh toán trước đó.</p>
                         <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
-                        <a href="/odoo/action-93">Quay lại Odoo</a>
+                        <a href="/odoo/action-156">Quay lại Odoo</a>
                         <!-- --------Hết---------- -->
                     </div>
                 </body>
@@ -151,12 +151,22 @@ class CheckoutController(http.Controller):
                         background: #a50064;
                         color: #fff;
                     }}
+                    
                     .btn-momo:hover {{
                         background: #c20075;
                         transform: translateY(-2px);
                         box-shadow: 0 5px 15px rgba(165, 0, 100, 0.4);
                     }}
+                    .btn-sepay {{
+                        background:#00a86b;
+                        color:white;
+                    }}
                     
+                    .btn-sepay:hover {{
+                        background:#008c59;
+                        transform:translateY(-2px);
+                    }}
+
                     .qr-section {{
                         background: rgba(255, 255, 255, 0.02);
                         border-radius: 16px;
@@ -211,18 +221,24 @@ class CheckoutController(http.Controller):
 
                     <div class="section-title">Chọn ví hoặc cổng thanh toán</div>
                     <div class="btn-list">
-                        <a href="{base_url}/payment/vnpay_direct/{payment.id}" class="pay-btn btn-vnpay">
-                            Thanh toán qua Cổng VNPay
-                        </a>
-                        <a href="{base_url}/payment/momo_direct/{payment.id}" class="pay-btn btn-momo">
-                            Thanh toán qua Ví MoMo
-                        </a>
+                    <a href="{base_url}/payment/vnpay_direct/{payment.id}" class="pay-btn btn-vnpay">
+                    Thanh toán qua Cổng VNPay
+                    </a>
+                    <a href="{base_url}/payment/momo_direct/{payment.id}" class="pay-btn btn-momo">
+                    Thanh toán qua Ví MoMo
+                    </a>
+                    <a href="{base_url}/payment/sepay_direct/{payment.id}" class="pay-btn btn-sepay">
+                    Thanh toán qua SePay
+                    </a>
                     </div>
                 </div>
             </body>
         </html>
         """
-        return request.make_response(html, headers=[
-            ('Content-Type', 'text/html'),
-            ('ngrok-skip-browser-warning', 'true')
-        ])
+        return request.make_response(
+            html,
+            headers=[
+                ('Content-Type', 'text/html'),
+                ('ngrok-skip-browser-warning', 'true')
+            ]
+        )
