@@ -55,7 +55,7 @@ class XalaEcoCustomer(models.Model):
         ('office', 'Văn phòng'),
     ], string='Loại khách hàng', default='household')
 
-    monthly_fee = fields.Float(string='Phí hộ dân/tháng', default=87000)
+    monthly_fee = fields.Float(string='Phí hộ dân/tháng', default=84000)
 
     state = fields.Selection([
         ('active', 'Đang sử dụng'),
@@ -77,6 +77,7 @@ class XalaEcoCustomer(models.Model):
     tax_code = fields.Char(string='Mã số thuế')
     invoice_name = fields.Char(string='Tên đơn vị xuất hóa đơn')
     invoice_address = fields.Text(string='Địa chỉ xuất hóa đơn')
+    partner_id = fields.Many2one('res.partner', string='Đối tác liên kết', ondelete='set null')
     
     note = fields.Text(string='Ghi chú')
 
@@ -136,3 +137,25 @@ class XalaEcoCustomer(models.Model):
                 'default_pricing_area': default_pricing_area,
             }
         }
+
+    def _get_or_create_partner(self):
+        self.ensure_one()
+        partner_name = self.invoice_name or self.name
+        if not self.partner_id:
+            partner = self.env['res.partner'].create({
+                'name': partner_name,
+                'phone': self.phone,
+                'email': self.email,
+                'vat': self.tax_code,
+                'street': self.invoice_address or '',
+            })
+            self.partner_id = partner.id
+        else:
+            self.partner_id.write({
+                'name': partner_name,
+                'phone': self.phone,
+                'email': self.email,
+                'vat': self.tax_code,
+                'street': self.invoice_address or '',
+            })
+        return self.partner_id

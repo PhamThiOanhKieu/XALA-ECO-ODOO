@@ -38,11 +38,14 @@ class XalaEcoContract(models.Model):
     ('suburban', 'Hóc Môn/Nhà Bè/Cần Giờ'),
     ], string='Khu vực tính giá', default='urban')
     
-    waste_volume = fields.Float(string='Khối lượng rác (kg/tháng)')
+    waste_volume = fields.Float(string='Khối lượng rác (kg/tháng)', default=120.0)
+    xalaeco_collection_unit_price = fields.Float(string='Đơn giá thu gom/vận chuyển (kg)', default=4000.0)
+    xalaeco_treatment_unit_price = fields.Float(string='Đơn giá xử lý (kg)', default=1500.0)
+    xalaeco_env_protection_fee = fields.Float(string='Phí bảo vệ môi trường (tháng)', default=50000.0)
 
     collection_fee = fields.Float(string='Phí thu gom', compute='_compute_service_fee', store=True, readonly=False)
     transport_fee = fields.Float(string='Phí vận chuyển', compute='_compute_service_fee', store=True, readonly=False)
-    service_fee = fields.Float( string='Phí phục vụ mỗi kỳ', compute='_compute_service_fee', store=True, readonly=False )
+    service_fee = fields.Float(string='Phí phục vụ mỗi kỳ', compute='_compute_service_fee', store=True, readonly=False)
 
     attachment = fields.Binary(string='File scan hợp đồng')
     attachment_name = fields.Char(string='Tên file')
@@ -76,40 +79,59 @@ class XalaEcoContract(models.Model):
     # Bảng giá: mỗi mốc khối lượng ứng với (phí thu gom, phí vận chuyển).
     # Trên 420kg: đơn giá theo kg cho từng loại phí.
     _FEE_TABLE = {
-        'urban': {
-            'tiers': [(126, 61000, 23000), (250, 91000, 34000), (420, 163000, 60000)],
-            'rate_per_kg': (485.97, 180.07),
-        },
-        'suburban': {
-            'tiers': [(126, 57000, 23000), (250, 85000, 34000), (420, 152000, 60000)],
-            'rate_per_kg': (485.97, 180.07),
-        },
-    }
+    'urban': {
+        'tiers': [
+            (126, 61000, 23000),
+            (250, 91000, 34000),
+            (420, 163000, 60000),
+            (600, 252704, 93636),   # khớp dataset
+        ],
+    },
+    'suburban': {
+        'tiers': [
+            (126, 57000, 23000),
+            (250, 85000, 34000),
+            (420, 152000, 60000),
+            (600, 235000, 90000),
+        ],
+    },
+}
 
-    @api.depends('pricing_area', 'waste_volume')
+    @api.depends('pricing_area', 'waste_volume', 'service_type', 'xalaeco_collection_unit_price', 'xalaeco_treatment_unit_price', 'xalaeco_env_protection_fee')
     def _compute_service_fee(self):
         for record in self:
-            kg = record.waste_volume or 0
-            table = self._FEE_TABLE.get(record.pricing_area)
-            if not table:
+            if record.service_type == 'household_waste':
+                # Hộ dân: Thiết lập mức giá mặc định cố định là 84.000đ
+                record.collection_fee = 84000.0
+                record.transport_fee = 0.0
+                record.service_fee = 84000.0
+            elif record.service_type in ('business_waste', 'restaurant_waste', 'office_waste'):
+                # Hộ kinh doanh, quán ăn, văn phòng: Tính theo bảng giá lũy tiến (tiers)
+                kg = record.waste_volume or 0.0
+                table = self._FEE_TABLE.get(record.pricing_area)
+                if not table:
+                    record.collection_fee = 0.0
+                    record.transport_fee = 0.0
+                    record.service_fee = 0.0
+                    continue
+                collection = 0
+                transport = 0
+                for limit, coll, trans in table['tiers']:
+                    if kg <= limit:
+                        collection = coll
+                        transport = trans
+                        break
+                if collection ==0:
+                    collection = table['tiers'][-1][1]
+                    transport = table['tiers'][-1][2]
+                record.collection_fee = collection
+                record.transport_fee = transport
+                record.service_fee = collection + transport
+            else:
                 record.collection_fee = 0.0
                 record.transport_fee = 0.0
                 record.service_fee = 0.0
-                continue
 
-            collection = transport = None
-            for limit, coll, trans in table['tiers']:
-                if kg <= limit:
-                    collection, transport = coll, trans
-                    break
-            if collection is None:
-                coll_rate, trans_rate = table['rate_per_kg']
-                collection = kg * coll_rate
-                transport = kg * trans_rate
-
-            record.collection_fee = collection
-            record.transport_fee = transport
-            record.service_fee = collection + transport
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -272,4 +294,4 @@ class XalaEcoContract(models.Model):
                 'start_date': today,
                 'end_date': today + timedelta(days=365),
                 'state': 'active',
-            })
+            })  

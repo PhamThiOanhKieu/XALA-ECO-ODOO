@@ -1,4 +1,4 @@
-/** @odoo-module alias=XALA-ECO-ODOO.xalaeco_dashboard **/
+/** @odoo-module **/
 
 import { registry } from "@web/core/registry";
 import { Component, xml } from "@odoo/owl";

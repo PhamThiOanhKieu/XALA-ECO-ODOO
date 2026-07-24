@@ -819,3 +819,30 @@ class XalaMobileController(http.Controller):
             return {'status': 'success', 'message': f'Đã cập nhật vị trí ({lat}, {lng})'}
         else:
             return {'status': 'error', 'message': 'Tọa độ không hợp lệ'}
+
+    @http.route('/xala_eco/tax_api/submit', type='json', auth='public', methods=['POST'], csrf=False)
+    def tax_api_submit(self, **post):
+        # Parse JSON data
+        data = post or {}
+        tax_code = data.get('tax_code')
+        company_tax_code = data.get('company_tax_code')
+        invoice_no = data.get('invoice_no')
+        amount = data.get('amount')
+        
+        if not tax_code or not company_tax_code or not invoice_no:
+            return {
+                'status': 'error',
+                'message': 'Thiếu thông tin bắt buộc (Mã số thuế hoặc Số hóa đơn)'
+            }
+            
+        import uuid
+        from datetime import datetime
+        random_str = str(uuid.uuid4())[:10].upper()
+        verification_code = f"TCT-{random_str}"
+        
+        return {
+            'status': 'success',
+            'verification_code': verification_code,
+            'send_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'message': 'Đã truyền nhận thông tin hóa đơn thành công.'
+        }

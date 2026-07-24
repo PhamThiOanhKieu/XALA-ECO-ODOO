@@ -43,6 +43,7 @@
                  </header>
 
                 <sheet>
+                     <field name="state" invisible="1"/>
                     <group string="Thông tin kỳ thu phí">
                         <field name="name"/>
                         <field name="month"/>
@@ -56,19 +57,6 @@
                         <field name="total_debt" readonly="1"/>
                     </group>
 
-                    <notebook>
-                        <page string="Danh sách thanh toán được sinh tự động">
-                            <field name="payment_ids" readonly="1">
-                                <list> <field name="name"/>
-                                    <field name="customer_id"/>
-                                    <field name="contract_id"/>
-                                    <field name="amount_due"/>
-                                    <field name="amount_paid"/>
-                                    <field name="debt_amount"/>
-                                    <field name="state"/>
-                                </list> </field>
-                        </page>
-                    </notebook>
                  </sheet>
 
                  <chatter/>

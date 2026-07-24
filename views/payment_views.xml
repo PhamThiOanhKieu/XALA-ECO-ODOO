@@ -2,6 +2,7 @@
     <record id="view_xalaeco_payment_tree" model="ir.ui.view">
         <field name="name">xalaeco.payment.tree</field>
         <field name="model">xalaeco.payment</field>
+        <field name="priority">5</field>
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
@@ -11,6 +12,9 @@
                 <field name="amount_paid"/>
                 <field name="debt_amount"/>
                 <field name="payment_method"/>
+                <field name="xalaeco_contract_status" widget="badge"
+                       decoration-success="xalaeco_contract_status == 'active'"
+                       decoration-danger="xalaeco_contract_status == 'no_contract'"/>
                 <field name="state"/>
             </list>
         </field>
@@ -37,6 +41,11 @@
                             type="object"
                             class="btn-secondary"
                             invisible="payment_method == 'vnpay'"/>
+                    <button name="action_create_invoice"
+                            string="Tạo hóa đơn"
+                            type="object"
+                            class="btn-success"
+                            invisible="invoice_id != False"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="unpaid,partial,paid"/>
                 </header>
@@ -54,6 +63,7 @@
                             <field name="payment_date"/>
                             <field name="payment_method"/>
                             <field name="bank_transaction_code"/>
+                            <field name="invoice_id" readonly="1"/>
                         </group>
 
                         <group string="Số tiền và công nợ">

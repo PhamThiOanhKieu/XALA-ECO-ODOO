@@ -95,14 +95,7 @@ class XalaEcoBilling(models.Model):
                 })
 
         billing.state = 'collecting'
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Thanh toán QR của kỳ thu phí',
-            'res_model': 'xalaeco.payment',
-            'view_mode': 'list,form',
-            'domain': [('billing_id', '=', billing.id)],
-            'context': {'default_billing_id': billing.id},
-            }
+        return True
 
     def action_close_period(self):
         for record in self:

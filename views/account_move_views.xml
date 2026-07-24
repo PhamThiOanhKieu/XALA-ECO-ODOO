@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_inherit_xalaeco" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.xalaeco</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Nút gửi cơ quan thuế trên header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_xalaeco_send_to_tax_authority"
+                        string="Gửi cơ quan thuế"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'posted' or xalaeco_tax_verification_code != False or move_type != 'out_invoice'"/>
+            </xpath>
+
+            <!-- Ẩn nút Giấy báo có (Credit Note) -->
+            <xpath expr="//button[@name='action_reverse']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Ẩn nút Đặt lại thành nháp (Reset to Draft) -->
+            <xpath expr="//button[@name='button_draft']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Thêm trường thông tin tùy chỉnh vào group thông tin khách hàng -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="xalaeco_customer_id" options="{'no_create': True}" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_tax_code" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_issuing_unit" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_serial" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_payment_method" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_payment_term" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_service_from_date" invisible="move_type != 'out_invoice'"/>
+                <field name="xalaeco_service_to_date" invisible="move_type != 'out_invoice'"/>
+            </xpath>
+
+            <!-- Ẩn tab "Other Info" mặc định của Odoo (có Incoterm không liên quan) bằng id -->
+            <xpath expr="//page[@id='other_tab']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+
+            <!-- Thêm các tab mới nghiệp vụ XALA ECO vào notebook -->
+            <xpath expr="//notebook" position="inside">
+
+                <!-- TAB: Hóa đơn điện tử (XALA ECO) -->
+                <page string="Hóa đơn điện tử Việt Nam" name="xalaeco_einvoice" invisible="move_type != 'out_invoice'">
+                    <group>
+                        <group string="Thông tin hóa đơn">
+                            <field name="xalaeco_invoice_number" string="Số hóa đơn" readonly="1"/>
+                            <field name="xalaeco_issue_date" string="Ngày phát hành" readonly="1"/>
+                            <field name="xalaeco_invoice_status" string="Trạng thái" readonly="1"/>
+                        </group>
+                        <group string="Mã số thuế">
+                            <field name="xalaeco_tax_code" string="MST người mua" readonly="1"/>
+                            <field name="xalaeco_company_tax_code" string="MST đơn vị" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Xác thực cơ quan thuế">
+                        <group>
+                            <field name="xalaeco_tax_verification_code" string="Mã xác thực" readonly="1"/>
+                            <field name="xalaeco_tax_send_time" string="Thời gian xác thực" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="xalaeco_lookup_code" string="Mã tra cứu" readonly="1"/>
+                            <field name="xalaeco_is_sent_to_tax" string="Đã gửi cơ quan thuế" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- TAB 1: Thông tin kỳ thu phí -->
+                <page string="Thông tin kỳ thu phí" name="xalaeco_billing_info" invisible="move_type != 'out_invoice'">
+                    <group>
+                        <group string="Thông tin kỳ thu phí">
+                            <field name="xalaeco_billing_period" placeholder="07/2026"/>
+                            <field name="xalaeco_customer_type" widget="radio"/>
+                        </group>
+                        <group string="Thực hiện">
+                            <field name="xalaeco_payment_method" readonly="1"/>
+                            <field name="xalaeco_staff_name" placeholder="Nguyễn Văn A"/>
+                        </group>
+                    </group>
+                    <group string="Ghi chú">
+                        <field name="xalaeco_note" nolabel="1" placeholder="Thu gom định kỳ hàng tháng"/>
+                    </group>
+                </page>
+
+
+                <page string="Chữ ký số &amp; Thuế điện tử" name="xalaeco_e_signature" invisible="move_type != 'out_invoice'">
+                    <group>
+                        <group string="Trạng thái ký số">
+                            <field name="xalaeco_is_sent_to_tax" string="✓ Đã ký số &amp; gửi cơ quan thuế" readonly="1"/>
+                            <field name="xalaeco_tax_verification_code" string="Mã xác thực" readonly="1"/>
+                            <field name="xalaeco_tax_send_time" string="Ngày ký" readonly="1"/>
+                            <field name="xalaeco_issuing_unit" string="Người ký" readonly="1"/>
+                        </group>
+                        <group string="Con dấu điện tử">
+                            <field name="xalaeco_digital_signature" widget="image" readonly="1"
+                                   style="max-width: 150px; max-height: 150px; display: block;"/>
+                        </group>
+                    </group>
+                    <group string="Thông tin thanh toán">
+                        <group>
+                            <field name="xalaeco_amount_in_words" string="Số tiền bằng chữ" readonly="1"/>
+                            <field name="xalaeco_vietqr_url" readonly="1" widget="url" string="Link VietQR"/>
+                        </group>
+                    </group>
+                </page>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

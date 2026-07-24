@@ -1,0 +1,28 @@
+<odoo>
+    <record id="view_company_form_inherit_xalaeco" model="ir.ui.view">
+        <field name="name">res.company.form.inherit.xalaeco</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="XALA ECO Hóa đơn &amp; Con dấu" name="xalaeco_invoice_settings">
+                    <group>
+                        <group string="Thông tin pháp lý bên bán">
+                            <field name="xalaeco_tax_code"/>
+                            <field name="xalaeco_address"/>
+                            <field name="xalaeco_phone"/>
+                            <field name="xalaeco_email"/>
+                        </group>
+                        <group string="Tài khoản nhận thanh toán">
+                            <field name="xalaeco_bank_account"/>
+                            <field name="xalaeco_bank_name"/>
+                        </group>
+                        <group string="Mô phỏng chữ ký số">
+                            <field name="xalaeco_company_seal" widget="image" style="max-width: 150px; max-height: 150px; display: block;"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
