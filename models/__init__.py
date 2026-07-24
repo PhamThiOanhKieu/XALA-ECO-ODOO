@@ -5,12 +5,18 @@ from . import payment
 from . import dashboard
 from . import hr_management
 from . import customer_map
+from . import feedback
 from . import employee_map
 from . import contract_map
 from . import payment_map
+
 from . import account_move
 from . import res_company
 from . import account_payment_register
+
+from . import momo_utils
+from . import sepay_utils
+
 
 # Monkeypatch ir.actions.report to force using the packaged wkhtmltopdf on Windows
 import os

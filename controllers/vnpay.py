@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 import logging
 from odoo import http, fields
 from odoo.http import request
@@ -8,9 +11,7 @@ _logger = logging.getLogger(__name__)
 
 class VNPayController(http.Controller):
 
-    ############################################################################
-    # NOTE: ROUTE XỬ LÝ KẾT QUẢ VNPAY REDIRECT VỀ SAU KHI THANH TOÁN XONG
-    ############################################################################
+
     @http.route('/payment/vnpay_return', type='http', auth='public', website=False, csrf=False)
     def vnpay_return(self, **kwargs):
         _logger.info("VNPay return called with params: %s", kwargs)
@@ -87,11 +88,13 @@ class VNPayController(http.Controller):
                 <h1 style="color: {'green' if success else 'red'};">{message}</h1>
                 <p>Mã giao dịch: {txn_ref or ''}</p>
                 <br/>
-                <a href="/odoo/xalaeco-payment" 
+                <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
+                <a href="/odoo/action-156" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo
                 </a>
+                <!-- --------Hết---------- -->
             </body>
         </html>
         """
@@ -100,9 +103,7 @@ class VNPayController(http.Controller):
             ('ngrok-skip-browser-warning', 'true'),
         ])
 
-    ############################################################################
-    # NOTE: ROUTE HIỂN THỊ TRANG THANH TOÁN TRUNG GIAN (NẾU CẦN)
-    ############################################################################
+
     @http.route('/payment/pay/<int:payment_id>', type='http', auth='public', csrf=False)
     def payment_page(self, payment_id, **kwargs):
         payment = request.env['xalaeco.payment'].sudo().browse(payment_id)
@@ -147,9 +148,7 @@ class VNPayController(http.Controller):
             ('ngrok-skip-browser-warning', 'true'),
         ])
     
-    ############################################################################
-    # NOTE: ROUTE XỬ LÝ LINK TRỰC TIẾP TỪ TIN NHẮN SMS -> SANG CỔNG VNPAY
-    ############################################################################
+
     @http.route('/payment/vnpay_direct/<int:payment_id>', type='http', auth='public', csrf=False)
     def vnpay_direct(self, payment_id, **kwargs):
         payment = request.env['xalaeco.payment'].sudo().browse(payment_id)

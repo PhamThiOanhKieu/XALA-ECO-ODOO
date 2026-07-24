@@ -1,0 +1,379 @@
+/* XALA ECO - SePay Checkout */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    background: #f4f6fb;
+    color: #333;
+}
+
+.sepay-wrapper {
+    width: 100%;
+    max-width: 1180px;
+    margin: 35px auto;
+    padding: 0 20px;
+}
+
+.sepay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.sepay-logo {
+    width: 52px;
+    margin-right: 15px;
+}
+
+.header-left h2 {
+    font-size: 30px;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.header-left p {
+    color: #64748b;
+    font-size: 15px;
+}
+
+.expire-badge {
+    background: #FFF4D6;
+    border: 1px solid #FFD76A;
+    color: #8A6D3B;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.sepay-card {
+    background: white;
+    border-radius: 22px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 10px 40px rgba(0,0,0,.08);
+}
+
+.left-panel {
+    width: 40%;
+    background: #FAFAFA;
+    padding: 45px;
+    border-right: 1px solid #ECECEC;
+    text-align: center;
+}
+
+.left-panel h2 {
+    font-size: 24px;
+    margin-bottom: 25px;
+}
+
+.qr-box {
+    width: 330px;
+    height: 330px;
+    background: white;
+    margin: auto;
+    border-radius: 18px;
+    border: 1px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-image {
+    width: 290px;
+    height: 290px;
+}
+
+.download-btn {
+    width: 100%;
+    margin-top: 25px;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #16A34A;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.download-btn:hover {
+    background: #15803D;
+}
+
+.note {
+    margin-top: 18px;
+    color: #6B7280;
+    line-height: 28px;
+}
+
+.right-panel {
+    width: 60%;
+    padding: 45px;
+}
+
+.right-panel h3 {
+    font-size: 27px;
+    margin-bottom: 25px;
+    color: #111827;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-table tr {
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.info-table td {
+    padding: 18px 0;
+    vertical-align: middle;
+}
+
+.info-table td:first-child {
+    width: 180px;
+    color: #64748B;
+}
+
+.bank-info {
+    display: flex;
+    align-items: center;
+}
+
+.bank-logo {
+    width: 42px;
+    margin-right: 12px;
+}
+
+.bank-name {
+    font-weight: 700;
+    color: #111827;
+}
+
+.bank-desc {
+    color: #94A3B8;
+    font-size: 13px;
+}
+
+.money {
+    color: #16A34A;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.order-code {
+    font-weight: 700;
+    color: #2563EB;
+}
+
+.copy-btn {
+    margin-left: 10px;
+    border: none;
+    background: #2563EB;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 13px;
+}
+
+.copy-btn:hover {
+    background: #1D4ED8;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status.waiting {
+    background: #FFF7CC;
+    color: #B7791F;
+}
+
+.status.success {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.status.failed {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.warning-box {
+    margin-top: 35px;
+    background: #FFF8E7;
+    border: 1px solid #FFD76A;
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.warning-box strong {
+    display: block;
+    color: #92400E;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.warning-box p {
+    color: #6B7280;
+    line-height: 28px;
+}
+
+.payment-success {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+}
+
+.success-box {
+    width: 430px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 40px;
+    text-align: center;
+    animation: popup .25s ease;
+}
+
+.success-icon {
+    width: 90px;
+    height: 90px;
+    margin: auto;
+    border-radius: 50%;
+    background: #22C55E;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 46px;
+    font-weight: 700;
+}
+
+.success-box h2 {
+    margin-top: 22px;
+    color: #16A34A;
+    font-size: 28px;
+}
+
+.success-box p {
+    margin-top: 12px;
+    color: #64748B;
+    line-height: 28px;
+}
+
+.success-btn {
+    width: 100%;
+    margin-top: 30px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #2563EB;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.success-btn:hover {
+    background: #1D4ED8;
+}
+
+#countdown {
+    font-weight: 700;
+    color: #DC2626;
+}
+
+@keyframes popup {
+    from {
+        opacity: 0;
+        transform: scale(.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.sandbox-btn {
+    margin-top: 18px;
+}
+
+.simulate-btn {
+    width: 100%;
+    border: none;
+    background: #F59E0B;
+    color: #fff;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.simulate-btn:hover {
+    background: #D97706;
+}
+
+@media(max-width:992px) {
+    .sepay-card {
+        flex-direction: column;
+    }
+    .left-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #ECECEC;
+    }
+    .right-panel {
+        width: 100%;
+    }
+    .qr-box {
+        width: 260px;
+        height: 260px;
+    }
+    .qr-image {
+        width: 225px;
+        height: 225px;
+    }
+    .info-table td {
+        display: block;
+        width: 100% !important;
+        padding: 8px 0;
+    }
+    .info-table tr {
+        display: block;
+        padding: 15px 0;
+    }
+    .header-left h2 {
+        font-size: 24px;
+    }
+    .expire-badge {
+        font-size: 13px;
+        padding: 10px 15px;
+    }
+}

@@ -4,8 +4,10 @@ from datetime import date
 import urllib.parse
 import base64
 import requests
+import json
 
 from . import vnpay_utils
+
 
 class XalaEcoPayment(models.Model):
     _name = 'xalaeco.payment'
@@ -24,9 +26,11 @@ class XalaEcoPayment(models.Model):
 
     payment_date = fields.Date(string='Ngày thanh toán')
     payment_method = fields.Selection([
-        ('cash', 'Tiền mặt'),
-        ('vnpay', 'Thanh toán VNPay'),
-    ], string='Phương thức thanh toán')
+    ('cash', 'Tiền mặt'),
+    ('vnpay', 'VNPay'),
+    ('momo', 'MoMo'),
+    ('sepay', 'SePay'),
+    ], string="Phương thức")
 
     bank_transaction_code = fields.Char(string='Mã giao dịch ngân hàng')
     bank_code = fields.Char(string='Mã ngân hàng', default='VCB')
@@ -35,11 +39,22 @@ class XalaEcoPayment(models.Model):
 
     transfer_content = fields.Char(string='Nội dung chuyển khoản', compute='_compute_transfer_content', store=True)
     qr_url = fields.Char(string='Link VietQR', compute='_compute_qr_url', store=True)
-    # GEMINI_NOTE: Đổi store=True thành store=False để Odoo không gửi 500+ request tải ảnh QR đồng thời khi sinh công nợ
     qr_image = fields.Binary(string='QR thanh toán', compute='_compute_qr_image', store=False)
 
     vnp_txn_ref = fields.Char(string='Mã giao dịch VNPay (TxnRef)', copy=False)
     
+    # CHỈNH SỬA NGÀY 20/07/2026: Thêm trường lưu mã giao dịch MoMo Sandbox
+    momo_txn_ref = fields.Char(string='Mã giao dịch MoMo (TxnRef)', copy=False)
+    #--------Hết----------
+    sepay_order_id = fields.Char(copy=False)
+    sepay_order_code = fields.Char(copy=False)
+    sepay_va_number = fields.Char(copy=False)
+    sepay_qr = fields.Binary("QR SePay", attachment=True)
+
+    sepay_expired_at = fields.Datetime(string="Hết hạn SePay", copy=False)
+    sepay_status = fields.Char(string="Trạng thái SePay", copy=False)
+
+
     state = fields.Selection([
         ('unpaid', 'Chưa thanh toán'),
         ('partial', 'Thanh toán một phần'),
@@ -146,7 +161,6 @@ class XalaEcoPayment(models.Model):
     @api.depends('qr_url')
     def _compute_qr_image(self):
         for record in self:
-            # GEMINI_NOTE: Vô hiệu hóa tải ảnh VietQR bằng requests.get vì hệ thống chuyển sang dùng VNPay
             record.qr_image = False
 
     @api.depends('amount_due', 'amount_paid')
@@ -228,24 +242,24 @@ class XalaEcoPayment(models.Model):
             'target': 'self',
         }
 
-    def action_create_invoice(self):
+def action_create_invoice(self):
         self.ensure_one()
         if self.invoice_id:
             raise UserError('Hóa đơn đã được tạo cho lượt thanh toán này!')
 
-        # Ràng buộc: Khách hàng phải có hợp đồng đang hiệu lực mới được tạo hóa đơn
         contract = self.env['xalaeco.contract'].search([
             ('customer_id', '=', self.customer_id.id),
             ('state', 'in', ['active', 'near_expired']),
         ], limit=1)
+
         if not contract:
             raise UserError(f"Khách hàng '{self.customer_id.name}' không có hợp đồng đang hiệu lực. Không thể xuất hóa đơn.")
 
-        # Tự động tìm hoặc tạo Sổ nhật ký Bán hàng (Sales Journal)
         journal = self.env['account.journal'].search([
             ('type', '=', 'sale'),
             ('company_id', '=', self.env.company.id)
         ], limit=1)
+
         if not journal:
             journal = self.env['account.journal'].create({
                 'name': 'Hóa đơn bán hàng',
@@ -259,14 +273,15 @@ class XalaEcoPayment(models.Model):
         invoice_vals = {
             'move_type': 'out_invoice',
             'partner_id': partner.id,
-            'journal_id': journal.id,  # Gán trực tiếp journal
+            'journal_id': journal.id,
             'xalaeco_customer_id': self.customer_id.id,
             'xalaeco_tax_code': self.customer_id.tax_code,
             'invoice_date': fields.Date.today(),
             'invoice_line_ids': [],
         }
+
         customer_type = self.customer_id.customer_type
-        
+
         if customer_type == 'household':
             invoice_vals['invoice_line_ids'].append((0, 0, {
                 'name': 'Phí dịch vụ thu gom rác thải sinh hoạt (Hộ dân)',
@@ -278,8 +293,8 @@ class XalaEcoPayment(models.Model):
                 ('customer_id', '=', self.customer_id.id),
                 ('state', '=', 'active'),
             ], limit=1)
+
             if contract:
-                # Dùng phí dịch vụ tổng hợp từ hợp đồng (bao gồm cả phí thu gom và xử lý)
                 invoice_vals['invoice_line_ids'].append((0, 0, {
                     'name': 'Dịch vụ thu gom và vận chuyển rác thải sinh hoạt',
                     'quantity': 1.0,
@@ -291,6 +306,7 @@ class XalaEcoPayment(models.Model):
                     'quantity': 1.0,
                     'price_unit': self.customer_id.monthly_fee or 0.0,
                 }))
+
         invoice = self.env['account.move'].create(invoice_vals)
         self.invoice_id = invoice.id
 
@@ -301,4 +317,40 @@ class XalaEcoPayment(models.Model):
             'view_mode': 'form',
             'res_id': invoice.id,
             'target': 'current',
+        }
+# Thanh toán MoMo Sandbox
+def action_pay_momo(self):
+        self.ensure_one()
+        ICP = self.env['ir.config_parameter'].sudo()
+        base_url = ICP.get_param('web.base.url')
+
+        payment_url = f"{base_url}/payment/momo_direct/{self.id}"
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': payment_url,
+            'target': 'self',
+        }
+
+
+    # Điều hướng sang trang thanh toán chung
+def action_pay_online(self):
+        self.ensure_one()
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f"{base_url}/payment/checkout/{self.id}",
+            'target': 'self',
+        }
+
+
+def action_pay_sepay(self):
+        self.ensure_one()
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+
+        return {
+            "type": "ir.actions.act_url",
+            "url": f"{base_url}/payment/sepay_direct/{self.id}",
+            "target": "self",
         }

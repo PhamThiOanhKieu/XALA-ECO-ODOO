@@ -26,8 +26,8 @@
         <field name="arch" type="xml">
             <form string="Thanh toán VNPay">
                 <header>
-                    <button name="action_pay_vnpay"
-                            string="Thanh toán VNPay"
+                    <button name="action_pay_online"
+                            string="Thanh toán TKNH"
                             type="object"
                             class="btn-primary"
                             invisible="state == 'paid'"/>
@@ -72,7 +72,7 @@
                             <field name="debt_amount"/>
                         </group>
                     </group>
-
+                    
                     <notebook>
                         <page string="Ghi chú đối soát">
                             <field name="note"/>
