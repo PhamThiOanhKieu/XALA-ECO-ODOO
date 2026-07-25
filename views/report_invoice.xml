@@ -1,0 +1,205 @@
+<odoo>
+    <!-- Khai báo hành động in báo cáo (Report Action) cho Hóa đơn XALA ECO -->
+    <record id="action_report_xalaeco_invoice" model="ir.actions.report">
+        <field name="name">Hóa đơn XALA ECO</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="report_file">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="print_report_name">'Hoa_don_XALA_ECO_%s' % (object.name or '')</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Ghi đè hành động in hóa đơn mặc định của Odoo -->
+    <record id="account.account_invoices" model="ir.actions.report">
+        <field name="report_name">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="report_file">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+    </record>
+
+    <record id="account.account_invoices_without_payment" model="ir.actions.report">
+        <field name="report_name">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="report_file">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+    </record>
+
+    <!-- Định nghĩa template báo cáo standalone -->
+    <template id="report_xalaeco_invoice_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif; color: #333; line-height: 1.3; border: 5px double #1b5e20; padding: 15px 20px; background-color: #ffffff; position: relative; box-sizing: border-box; border-radius: 4px;">
+                        
+                        <!-- PHẦN HEADER: LOGO, TIÊU ĐỀ HÓA ĐƠN & THÔNG TIN TRA CỨU -->
+                        <div style="width: 100%; height: 75px; border-bottom: 1.5px solid #1b5e20; padding-bottom: 5px; margin-bottom: 8px;">
+                            <div style="float: left; width: 30%; text-align: left;">
+                                <img src="/XALA_ECO_ODOO/static/src/img/logo.png" style="width: 130px; height: 50px; object-fit: contain; display: block; margin-bottom: 2px;"/>
+                                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: bold; font-size: 9px; color: #1b5e20; letter-spacing: 0.5px; padding-left: 2px;">VÌ MÔI TRƯỜNG XANH</div>
+                            </div>
+
+                            <div style="float: left; width: 45%; text-align: center; padding-top: 2px;">
+                                <h2 style="color: #d32f2f; font-weight: bold; margin: 0; font-size: 17px; letter-spacing: 0.3px;">HÓA ĐƠN ĐIỆN TỬ</h2>
+                                <div style="font-size: 10px; font-style: italic; color: #555; margin-top: 4px;" t-if="o.invoice_date">
+                                    Ngày <strong t-esc="o.invoice_date.strftime('%d')"/> tháng <strong t-esc="o.invoice_date.strftime('%m')"/> năm <strong t-esc="o.invoice_date.strftime('%Y')"/>
+                                </div>
+                                <div style="font-size: 10px; font-style: italic; color: #555; margin-top: 4px;" t-else="">
+                                    Ngày ........ tháng ........ năm ........
+                                </div>
+                            </div>
+
+                            <div style="float: right; width: 25%; text-align: left; padding-left: 10px; border-left: 1px solid #ddd; font-size: 10px; line-height: 1.4; height: 60px; box-sizing: border-box;">
+                                <div>Mẫu số: <span style="font-weight: bold;">01GTKT0/001</span></div>
+                                <div>Ký hiệu: <strong style="color: #d32f2f;" t-esc="o.xalaeco_serial or '1C25TAA'"/></div>
+                                <div>Số: <strong style="color: #d32f2f; font-size: 12px;" t-esc="o.name or 'Draft'"/></div>
+                            </div>
+                            <div style="clear: both;"/>
+                        </div>
+
+                        <!-- KHỐI 1: THÔNG TIN BÊN BÁN -->
+                        <div style="width: 100%; font-size: 10.5px; line-height: 1.5; margin-bottom: 6px;">
+                            <div style="float: left; width: 80%;">
+                                <div>Đơn vị bán hàng: 
+                                    <strong style="text-transform: uppercase; font-size: 11.5px; color: #1b5e20;">
+                                        <t t-if="o.company_id.name == 'My Company'">CƠ SỞ KINH DOANH MTV XALA ECO</t>
+                                        <t t-else=""><span t-esc="o.company_id.name"/></t>
+                                    </strong>
+                                </div>
+                                <div>Mã số thuế: <strong style="color: #d32f2f; font-size: 11.5px; letter-spacing: 0.5px;" t-esc="o.company_id.xalaeco_tax_code or '0311234567'"/></div>
+                                <div>Địa chỉ: 
+                                    <span style="font-weight: bold;">
+                                        <t t-if="o.company_id.name == 'My Company'">123 Nguyễn Văn Linh, P. Phú Mỹ, Q.7, TP. Hồ Chí Minh</t>
+                                        <t t-else=""><span t-esc="o.company_id.xalaeco_address"/></t>
+                                    </span>
+                                </div>
+                                <div>
+                                    <span style="display: inline-block; width: 50%;">Điện thoại: <span t-esc="o.company_id.xalaeco_phone or '(0236) 3 999 888'"/></span>
+                                    <span style="display: inline-block; width: 50%;">Email: <span t-esc="o.company_id.xalaeco_email or 'info@xalaeco.vn'"/></span>
+                                </div>
+                                <div>Tài khoản: <strong t-esc="o.company_id.xalaeco_bank_account or '1042253873'"/> Ngân hàng: <span t-esc="o.company_id.xalaeco_bank_name or 'Vietcombank'"/></div>
+                            </div>
+                            <div style="float: right; width: 18%; text-align: center; box-sizing: border-box; margin-top: 2px;">
+                                <img src="/XALA_ECO_ODOO/static/src/img/qr.png" style="width: 72px; height: 72px; display: inline-block; object-fit: contain;"/>
+                                <div style="font-size: 7.5px; font-weight: bold; color: #1b5e20; margin-top: 4px; line-height: 1.1; text-align: center;">Mã tra cứu hóa đơn</div>
+                            </div>
+                            <div style="clear: both;"/>
+                        </div>
+
+                        <!-- KHỐI 2: THÔNG TIN BÊN MUA -->
+                        <div style="border-top: 1.5px solid #1b5e20; padding-top: 5px; font-size: 10.5px; line-height: 1.5; margin-bottom: 8px;">
+                            <div>Họ tên người mua hàng: <strong t-esc="o.xalaeco_customer_id.name or ''"/></div>
+                            <div>Mã khách hàng: <strong t-esc="o.xalaeco_customer_id.customer_code or ''"/></div>
+                            <div>Số điện thoại: <span t-esc="o.xalaeco_customer_id.phone or ''"/></div>
+                            <div>Tuyến / Khu vực: <span t-esc="o.xalaeco_customer_id.area or ''"/> <t t-if="o.xalaeco_customer_id.route_id">(Mã tuyến: <span t-esc="o.xalaeco_customer_id.route_id"/>)</t></div>
+                            <div>
+                                <span style="display: inline-block; width: 50%;">Hình thức thanh toán: <span t-esc="o.xalaeco_payment_method or 'Chuyển khoản'"/></span>
+                            </div>
+                        </div>
+
+                        <!-- BẢNG CHI TIẾT DỊCH VỤ -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10.5px;">
+                            <thead>
+                                <tr style="background-color: #f4fbf7; text-align: center; font-weight: bold;">
+                                    <th style="border: 1.5px solid #1b5e20; padding: 4px; width: 5%;">STT</th>
+                                    <th style="border: 1.5px solid #1b5e20; padding: 4px; width: 45%;">Tên hàng hóa, dịch vụ</th>
+                                    <th style="border: 1.5px solid #1b5e20; padding: 4px; width: 12%;">Đơn vị tính</th>
+                                    <th style="border: 1.5px solid #1b5e20; padding: 4px; width: 10%;">Số lượng</th>
+                                    <th style="border: 1.5px solid #1b5e20; padding: 4px; width: 13%;">Đơn giá</th>
+                                    <th style="border: 1.5px solid #1b5e20; padding: 4px; width: 15%;">Thành tiền</th>
+                                </tr>
+                               
+                            </thead>
+                            <tbody>
+                                <t t-set="stt" t-value="1"/>
+                                <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: center;" t-esc="stt"/>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px;" t-esc="line.name"/>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: center;">
+                                        <t t-if="line.quantity == 1.0">tháng</t>
+                                        <t t-else="">kg</t>
+                                    </td>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right;" t-esc="line.quantity" t-options='{"widget": "float", "precision": 0}'/>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right;" t-esc="line.price_unit" t-options='{"widget": "float", "precision": 0}'/>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right;" t-esc="line.price_subtotal" t-options='{"widget": "float", "precision": 0}'/>
+                                    <t t-set="stt" t-value="stt + 1"/>
+                                </tr>
+                                <!-- 4 dòng trống vừa đẹp để không bị tràn trang -->
+                                <t t-foreach="range(stt, 5)" t-as="empty_row_idx">
+                                    <tr>
+                                        <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: center;" t-esc="empty_row_idx"/>
+                                        <td style="border: 1.5px solid #1b5e20; padding: 5px;">&amp;nbsp;</td>
+                                        <td style="border: 1.5px solid #1b5e20; padding: 5px;">&amp;nbsp;</td>
+                                        <td style="border: 1.5px solid #1b5e20; padding: 5px;">&amp;nbsp;</td>
+                                        <td style="border: 1.5px solid #1b5e20; padding: 5px;">&amp;nbsp;</td>
+                                        <td style="border: 1.5px solid #1b5e20; padding: 5px;">&amp;nbsp;</td>
+                                    </tr>
+                                </t>
+                                
+                                <tr style="font-weight: bold;">
+                                    <td colspan="5" style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right;">Cộng tiền hàng:</td>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right;" t-esc="o.amount_untaxed" t-options='{"widget": "float", "precision": 0}'/>
+                                </tr>
+                       
+                                <tr style="font-weight: bold; background-color: #f4fbf7;">
+                                    <td colspan="5" style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right; color: #1b5e20;">Tổng cộng tiền thanh toán:</td>
+                                    <td style="border: 1.5px solid #1b5e20; padding: 5px; text-align: right; color: #d32f2f; font-size: 11.5px;" t-esc="o.amount_total" t-options='{"widget": "float", "precision": 0}'/>
+                                </tr>
+                                <tr style="font-style: italic;">
+                                    <td colspan="6" style="border: 1.5px solid #1b5e20; padding: 6px; font-size: 10px;">
+                                        Số tiền viết bằng chữ: <strong t-esc="o.xalaeco_amount_in_words"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- PHẦN CHỮ KÝ VÀ CON DẤU ĐIỆN TỬ -->
+                        <div style="width: 100%; margin-top: 10px; font-size: 10.5px; margin-bottom: 10px;">
+                            <div style="float: left; width: 45%; text-align: center;">
+                                <strong>Người mua hàng</strong><br/>
+                                <span style="font-size: 9px; color: #666; font-style: italic;">(Ký, ghi rõ họ tên)</span>
+                            </div>
+
+                            <!-- Người bán với con dấu đỏ -->
+                            <div style="float: right; width: 45%; text-align: center; position: relative;">
+                                <strong>Người bán hàng</strong><br/>
+                                <span style="font-size: 9px; color: #666; font-style: italic;">(Ký, ghi rõ họ tên)</span>
+                                
+                                <div style="margin-top: 5px;" t-if="o.xalaeco_digital_signature">
+                                    <img t-att-src="image_data_uri(o.xalaeco_digital_signature)" style="width: 105px; height: 105px; display: inline-block; object-fit: contain; opacity: 0.85; border-radius: 50%;"/>
+                                    <div style="font-weight: bold; font-size: 10px; color: #333; margin-top: 5px; text-transform: uppercase;">CƠ SỞ KINH DOANH MTV XALA ECO</div>
+                                </div>
+                            </div>
+                            <div style="clear: both;"/>
+                        </div>
+
+                        <!-- THÔNG TIN TRA CỨU & MÃ XÁC THỰC THUẾ -->
+                        <div style="margin-top: 15px; border-top: 1.5px solid #1b5e20; padding-top: 8px; font-size: 10px; line-height: 1.5;">
+                            <div style="float: left; width: 62%;">
+                                <t t-if="o.xalaeco_tax_verification_code">
+                                    <div style="display: inline-block; border: 1px dashed #2e7d32; border-radius: 4px; padding: 3px 6px; background-color: #f4fbf7; text-align: left; margin-bottom: 3px;">
+                                        <svg width="12" height="15" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="float: left; margin-right: 5px; margin-top: 1px;">
+                                            <path d="M12 2 C18 2, 22 4, 22 4 C22 4, 22 14, 22 17 C22 22, 16 25, 12 26 C8 25, 2 22, 2 17 C2 14, 2 4, 2 4 C2 4, 6 2, 12 2 Z" fill="#2e7d32"/>
+                                            <path d="M7 13 L10 16 L17 9" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                        </svg>
+                                        <span style="font-size: 10px; font-weight: bold; color: #1b5e20;">Mã xác thực thuế: <span style="font-family: monospace;" t-esc="o.xalaeco_tax_verification_code"/></span>
+                                    </div>
+                                    <div style="font-size: 9px; color: #555;">Tra cứu hóa đơn điện tử tại: <strong style="color: #0288d1;">https://tracuuhoadon.gdt.gov.vn</strong></div>
+                                </t>
+                                <t t-else="">
+                                    <div style="font-size: 9px; color: #888; font-style: italic;">Hóa đơn chưa gửi cơ quan thuế.</div>
+                                </t>
+                            </div>
+                            <div style="float: right; width: 35%; text-align: right; font-style: italic; color: #555;">
+                                Mã tra cứu hóa đơn: <strong style="color: #333;" t-esc="o.xalaeco_lookup_code or ''"/>
+                            </div>
+                            <div style="clear: both;"/>
+                        </div>
+                        
+                        <!-- DÒNG CREDIT GIẢI PHÁP Ở CUỐI TRANG -->
+                        <div style="margin-top: 10px; border-top: 1px solid #ddd; padding-top: 5px; font-size: 8.5px; color: #777; text-align: center; font-style: italic;">
+                            Đơn vị cung cấp giải pháp: CƠ SỞ KINH DOANH MTV XALA ECO, MST: 0311234567, Hotline: (0236) 3 999 888, Website: www.xalaeco.vn
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

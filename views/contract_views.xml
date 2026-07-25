@@ -183,11 +183,10 @@
                         <field name="billing_cycle"/>
                         <field name="pricing_area"/>
                         
-                        <label for="waste_volume" style="white-space: nowrap !important; max-width: none !important; display: inline-block !important;"/>
-                        <div class="d-flex align-items-center">
-                            <field name="waste_volume" nolabel="1" class="oe_inline"/>
-                        </div>
-                        
+                        <field name="waste_volume"/>
+                        <field name="xalaeco_collection_unit_price" invisible="service_type == 'household_waste'"/>
+                        <field name="xalaeco_treatment_unit_price" invisible="service_type == 'household_waste'"/>
+                        <field name="xalaeco_env_protection_fee" invisible="service_type == 'household_waste'"/>
                         <field name="service_fee"/>
                         <field name="is_near_expired" invisible="1"/>
                     </group>

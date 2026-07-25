@@ -77,4 +77,10 @@
               parent="menu_xalaeco_revenue_root"
               action="action_xalaeco_revenue_dashboard_owl"
               sequence="4"/>
+
+    <menuitem id="menu_xalaeco_cskh_root"
+              name="CSKH"
+              parent="menu_xalaeco_root"
+              action="action_xalaeco_feedback"
+              sequence="6"/>
 </odoo>

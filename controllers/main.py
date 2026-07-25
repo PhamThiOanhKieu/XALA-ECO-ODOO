@@ -9,7 +9,7 @@ import json
 import logging
 _logger = logging.getLogger(__name__)
 
-from odoo.addons.xala_eco_odoo.models import vnpay_utils
+from odoo.addons.xalaeco_management.models import vnpay_utils
 
 SIM_TARGETS = {}
 
@@ -103,12 +103,40 @@ class XalaMobileController(http.Controller):
                 'customer_locations': customer_locs,
                 'employee_location': emp_loc
             })
-        
+            
+        assigned_feedbacks = request.env['xalaeco.feedback'].sudo().search([
+            ('assigned_employee_id', '=', employee.id),
+            ('state', '=', 'received')
+        ])
+
         return request.render('xala_eco.mobile_dashboard_template', {
             'employee': employee,
             'work_histories': histories_data,
-            'current_date': filter_date
+            'current_date': filter_date,
+            # Nhớ truyền biến này ra ngoài template
+            'assigned_feedbacks': assigned_feedbacks
         })
+
+    
+    
+    @http.route('/xala_mobile/resolve_feedback', type='http', auth='public', methods=['POST'], website=True)
+    def resolve_feedback(self, **post):
+        ticket_id = int(post.get('ticket_id'))
+        image_file = post.get('resolution_image')
+        
+        if ticket_id and image_file:
+            image_base64 = base64.b64encode(image_file.read())
+            ticket = request.env['xalaeco.feedback'].sudo().browse(ticket_id)
+            
+            # Đổi trạng thái thành Đã dọn dẹp và lưu ảnh
+            ticket.write({
+                'state': 'processed',
+                'resolution_image': image_base64,
+                'resolution_note': 'Nhân viên đã dọn dẹp và đính kèm hình ảnh.'
+            })
+            
+        return request.redirect('/xala_mobile/dashboard')
+
     @http.route('/xala_mobile/submit_attendance', type='json', auth='public', methods=['POST'])
     def submit_attendance(self, history_id, action_type, lat_lng, image_base64):
         emp_id = request.session.get('mobile_emp_id')
@@ -824,6 +852,114 @@ class XalaMobileController(http.Controller):
         else:
             return {'status': 'error', 'message': 'Tọa độ không hợp lệ'}
 
+
+    @http.route('/xala_eco/tax_api/submit', type='json', auth='public', methods=['POST'], csrf=False)
+    def tax_api_submit(self, **post):
+        # Parse JSON data
+        data = post or {}
+        tax_code = data.get('tax_code')
+        company_tax_code = data.get('company_tax_code')
+        invoice_no = data.get('invoice_no')
+        amount = data.get('amount')
+        
+        if not tax_code or not company_tax_code or not invoice_no:
+            return {
+                'status': 'error',
+                'message': 'Thiếu thông tin bắt buộc (Mã số thuế hoặc Số hóa đơn)'
+            }
+            
+        import uuid
+        from datetime import datetime
+        random_str = str(uuid.uuid4())[:10].upper()
+        verification_code = f"TCT-{random_str}"
+        
+        return {
+            'status': 'success',
+            'verification_code': verification_code,
+            'send_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'message': 'Đã truyền nhận thông tin hóa đơn thành công.'
+        }
+
+class XalaecoPortal(http.Controller):
+    # 1. TRANG ĐĂNG NHẬP
+    @http.route('/khach-hang', type='http', auth='public', website=True)
+    def login_page(self, **kw):
+        return request.render('xala_eco.portal_login_template', {})
+
+    # 2. XỬ LÝ ĐĂNG NHẬP (Check Mã KH + SĐT)
+    @http.route('/khach-hang/login', type='http', auth='public', methods=['POST'], website=True)
+    def do_login(self, **post):
+            phone = post.get('phone', '').strip()
+            
+            # Tìm khách hàng khớp cả 2 thông tin
+            customer = request.env['xalaeco.customer'].sudo().search([
+                ('phone', '=', phone)
+            ], limit=1)
+            
+            if customer:
+                # Lưu ID khách hàng vào Session
+                request.session['customer_id'] = customer.id
+                return request.redirect('/khach-hang/dashboard')
+            
+            # Đăng nhập sai
+            error_msg = 'Sai số điện thoại. Vui lòng kiểm tra lại!'
+            return request.render('xala_eco.portal_login_template', {'error': error_msg})
+
+    # 3. TRANG DASHBOARD (Hiển thị form và lịch sử)
+    @http.route('/khach-hang/dashboard', type='http', auth='public', website=True)
+    def dashboard(self, **kw):
+        customer_id = request.session.get('customer_id')
+        if not customer_id:
+            return request.redirect('/khach-hang')
+        
+        customer = request.env['xalaeco.customer'].sudo().browse(customer_id)
+        # Lấy danh sách khiếu nại của khách này, xếp mới nhất lên đầu
+        feedbacks = request.env['xalaeco.feedback'].sudo().search([('customer_id', '=', customer_id)], order='id desc')
+        
+        return request.render('xala_eco.portal_dashboard_template', {
+            'customer': customer,
+            'feedbacks': feedbacks
+        })
+
+    # 4. XỬ LÝ GỬI KHIẾU NẠI MỚI (Từ Web vào Odoo)
+    @http.route('/khach-hang/submit', type='http', auth='public', methods=['POST'], website=True)
+    def submit_feedback(self, **post):
+        customer_id = request.session.get('customer_id')
+        if not customer_id:
+            return request.redirect('/khach-hang')
+        
+        # Mã hóa ảnh sang dạng base64 để lưu vào Database Odoo
+        image_file = post.get('evidence_image')
+        image_base64 = False
+        if image_file:
+            image_base64 = base64.b64encode(image_file.read())
+
+        # Tạo ticket thẳng vào hệ thống
+        request.env['xalaeco.feedback'].sudo().create({
+            'customer_id': customer_id,
+            'feedback_type': post.get('feedback_type'),
+            'content': post.get('content'),
+            'evidence_image': image_base64,
+        })
+        return request.redirect('/khach-hang/dashboard')
+
+    # 5. XỬ LÝ ĐÁNH GIÁ (Nút Hài lòng / Chưa hài lòng)
+    @http.route('/khach-hang/rate', type='http', auth='public', methods=['POST'], website=True)
+    def rate_feedback(self, **post):
+        ticket_id = int(post.get('ticket_id'))
+        rating = post.get('rating')
+        
+        ticket = request.env['xalaeco.feedback'].sudo().browse(ticket_id)
+        if ticket and ticket.state == 'processed':
+            if rating == 'satisfied':
+                ticket.write({'state': 'closed', 'customer_rating': 'satisfied'})
+            elif rating == 'unsatisfied':
+                ticket.write({
+                    'state': 'received', 
+                    'customer_rating': 'unsatisfied',
+                    'resolution_note': 'Khách hàng KHÔNG HÀI LÒNG, yêu cầu nhân viên xử lý lại ngay!'
+                })
+        return request.redirect('/khach-hang/dashboard')
 class VNPayController(http.Controller):
 
     @http.route('/payment/vnpay_return', type='http', auth='public', website=False, csrf=False)
@@ -866,7 +1002,7 @@ class VNPayController(http.Controller):
                 <p>Mã giao dịch: {txn_ref or ''}</p>
                 <br/>
                 <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
-                <a href="/odoo/action-93" 
+                <a href="/odoo/action-156" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo
@@ -962,3 +1098,4 @@ class VNPayController(http.Controller):
         payment_url = vnpay_utils.build_payment_url(vnp_params, secret_key, vnp_url)
         
         return request.redirect(payment_url, local=False)
+

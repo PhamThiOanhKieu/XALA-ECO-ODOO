@@ -1,0 +1,135 @@
+<odoo>
+<template id="portal_login_template" name="Khách hàng Đăng nhập">
+<t t-call="web.layout">
+<t t-set="head">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+</t>
+<style> html, body { background-color: #F1EAFF !important; font-family: 'Inter', sans-serif; height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; } .login-container { width: 100%; max-width: 420px; padding: 0 20px; box-sizing: border-box; margin: 0 auto; } .login-card { background: #ffffff; border-radius: 24px; padding: 40px 25px; box-shadow: 0 10px 25px rgba(142, 112, 219, 0.15); width: 100%; box-sizing: border-box; } .brand-logo { color: #7A1CAC; font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 5px; } .brand-sub { font-size: 15px; color: #8E8D9A; text-align: center; margin-bottom: 35px; } .form-control-custom { background-color: #ffffff; border: 1.5px solid #E9ECEF; border-radius: 14px; height: 52px; font-size: 15px; width: 100%; padding-left: 15px; transition: all 0.3s ease; box-sizing: border-box; } .form-control-custom:focus { border-color: #A076F9; box-shadow: 0 0 0 3px rgba(160, 118, 249, 0.2); outline: none; } .form-label-custom { text-align: left; display: block; font-size: 15px; font-weight: 600; color: #333; margin-bottom: 8px; } .btn-login { background: linear-gradient(135deg, #A076F9 0%, #7A1CAC 100%); border: none; border-radius: 14px; height: 52px; color: white; font-size: 16px; font-weight: 700; margin-top: 25px; box-shadow: 0 8px 16px rgba(122, 28, 172, 0.25); width: 100%; transition: transform 0.2s; box-sizing: border-box; } .btn-login:active { transform: scale(0.96); } </style>
+<div class="login-container">
+<div class="login-card">
+<div class="brand-logo">XALA ECO</div>
+<div class="brand-sub">Cổng dịch vụ XALA ECO dành cho Khách Hàng</div>
+<form action="/khach-hang/login" method="post">
+<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+<div class="mb-4">
+<label class="form-label-custom">Số điện thoại đăng ký</label>
+<input type="text" name="phone" class="form-control-custom" required="1" placeholder="Nhập số điện thoại"/>
+</div>
+<button type="submit" class="btn-login">ĐĂNG NHẬP</button>
+</form>
+<t t-if="error">
+<div class="mt-4 p-3" style="background-color: #ffebee; border-radius: 12px; color: #d32f2f; text-align: center; font-size: 14px; font-weight: 500;">
+<span t-esc="error"/>
+</div>
+</t>
+</div>
+</div>
+</t>
+</template>
+<template id="portal_dashboard_template" name="Dashboard Khách hàng">
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<title>XALA ECO - Khách hàng</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap"/>
+<style> body { background-color: #f4f6fb; font-family: 'Inter', sans-serif; padding-bottom: 30px; -webkit-tap-highlight-color: transparent; } .header-gradient { background: linear-gradient(135deg, #480ca8, #8843f2); border-radius: 0 0 25px 25px; /* Tránh lẹm vào camera tai thỏ trên đt 21:9 */ padding: calc(env(safe-area-inset-top) + 30px) 20px 25px 20px; color: white; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(72, 12, 168, 0.2); } .custom-card { background: #ffffff; border-radius: 16px; padding: 20px; margin: 0 15px 20px 15px; box-shadow: 0 6px 12px rgba(0,0,0,0.03); border: none; } .section-title { font-weight: bold; font-size: 18px; color: #2b2b2b; margin: 0 15px 15px 15px; display: flex; align-items: center; } .section-title i { background: #f2e9fe; color: #5c18c2; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 14px; } .bg-light-purple { background-color: #f2e9fe; color: #5c18c2; border-radius: 10px; font-weight: 600; } .btn-gradient-purple { background: linear-gradient(135deg, #8843f2, #5c18c2); color: white; border: none; border-radius: 12px; padding: 14px; font-weight: bold; width: 100%; box-shadow: 0 4px 10px rgba(92, 24, 194, 0.3); transition: transform 0.2s; } .btn-gradient-purple:active { transform: scale(0.96); } .form-control-custom { background-color: #f8f9fa; border: 1.5px solid #e9ecef; border-radius: 12px; font-size: 15px; width: 100%; padding: 12px; height: auto; } .form-control-custom:focus { border-color: #8843f2; box-shadow: 0 0 0 3px rgba(136, 67, 242, 0.2); outline: none; background-color: #ffffff; } .upload-box { border: 1.5px dashed #d0bfff; border-radius: 16px; background-color: #f8f9fa; padding: 20px; text-align: center; } .history-item { border-bottom: 1px solid #f1eaff; padding: 15px 0; } .history-item:last-child { border-bottom: none; } .badge-status { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; } </style>
+</head>
+<body>
+<div class="header-gradient">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h2 class="font-weight-bold mb-0" style="font-size: 24px; letter-spacing: 1px;">XALA ECO</h2>
+<a href="/khach-hang" class="text-white small text-decoration-none">
+<i class="fas fa-sign-out-alt mr-1"/>
+Đăng xuất
+</a>
+</div>
+<div style="font-size: 16px; opacity: 0.9;">
+Chào khách hàng,
+<t t-esc="customer.name"/>
+👋
+</div>
+</div>
+<form action="/khach-hang/submit" method="post" enctype="multipart/form-data">
+<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+<div class="section-title">
+<i class="fas fa-paper-plane"/>
+Gửi khiếu nại
+</div>
+<div class="custom-card">
+<label class="font-weight-bold text-dark mb-2" style="font-size: 15px;">Loại vấn đề:</label>
+<select name="feedback_type" class="form-control-custom mb-3" required="1">
+<option value="late">Chậm thu gom rác</option>
+<option value="messy">Làm rơi vãi rác trước cửa</option>
+<option value="attitude">Thái độ nhân viên</option>
+<option value="other">Vấn đề khác</option>
+</select>
+<label class="font-weight-bold text-dark mb-2" style="font-size: 15px;">Hình ảnh hiện trường (Nếu có):</label>
+<div class="upload-box mb-3">
+<i class="fas fa-camera fa-2x mb-2" style="color: #8843f2; opacity: 0.8;"/>
+<p class="text-muted small mb-3" id="file-name-display">Chưa có ảnh hiện trường</p>
+<label class="btn-gradient-purple d-block mb-0" style="cursor: pointer; font-weight: 600;">
+<i class="fas fa-camera mr-2"/>
+CHỤP ẢNH HIỆN TRƯỜNG
+<input type="file" name="evidence_image" accept="image/*" style="display: none;" onchange="document.getElementById('file-name-display').innerText = this.files[0] ? this.files[0].name : 'Chưa có ảnh hiện trường';"/>
+</label>
+</div>
+<label class="font-weight-bold text-dark mb-2" style="font-size: 15px;">Mô tả chi tiết:</label>
+<textarea name="content" class="form-control-custom mb-4" rows="3" required="1" placeholder="Vui lòng mô tả rõ tình trạng"/>
+<button type="submit" class="btn-gradient-purple">
+<i class="fas fa-paper-plane mr-2"/>
+GỬI HỆ THỐNG
+</button>
+</div>
+</form>
+<div class="section-title mt-4">
+<i class="fas fa-history"/>
+Lịch sử của bạn
+</div>
+<div class="custom-card">
+<t t-if="not feedbacks">
+<div class="text-center py-4 text-muted small">Bạn chưa có phản hồi nào.</div>
+</t>
+<t t-else="">
+<t t-foreach="feedbacks" t-as="fb">
+<div class="history-item">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<span class="font-weight-bold" style="color: #5c18c2; font-size: 15px;">
+<t t-esc="fb.name"/>
+</span>
+<span t-if="fb.state == 'draft'" class="badge-status bg-warning text-dark">Đã gửi</span>
+<span t-if="fb.state == 'received'" class="badge-status bg-info text-white">Đang xử lý</span>
+<span t-if="fb.state == 'processed'" class="badge-status text-white" style="background-color: #8843f2;">Đã xử lý</span>
+<span t-if="fb.state == 'closed'" class="badge-status bg-secondary text-white">Hoàn thành</span>
+</div>
+<p class="text-muted small mb-2" style="font-size: 14px;">
+<t t-esc="fb.content"/>
+</p>
+<t t-if="fb.state == 'processed'">
+<div class="mt-3 p-3 rounded" style="background-color: #f2e9fe; border: 1px solid #d0bfff;">
+<p class="mb-3 font-weight-bold text-center" style="font-size: 13px; color: #5c18c2;">Khiếu nại của bạn đã được xử lý. Bạn có hài lòng?</p>
+<form action="/khach-hang/rate" method="post" class="d-flex" style="gap: 10px;">
+<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+<input type="hidden" name="ticket_id" t-att-value="fb.id"/>
+<button type="submit" name="rating" value="satisfied" class="btn text-white w-100 font-weight-bold" style="background-color: #5c18c2; border-radius: 8px;">Hài lòng</button>
+<button type="submit" name="rating" value="unsatisfied" class="btn text-danger w-100 font-weight-bold" style="background-color: #ffffff; border: 1px solid #dc3545; border-radius: 8px;">Không hài lòng</button>
+</form>
+</div>
+</t>
+<t t-elif="fb.state == 'closed'">
+<div class="small p-2 rounded mt-2" style="background-color: #f8f9fa; border-left: 3px solid #5c18c2;">
+<span class="font-weight-bold" style="color: #5c18c2;">Phản hồi:</span>
+<span class="text-muted">
+<t t-esc="fb.resolution_note or 'Đã hoàn tất.'"/>
+</span>
+</div>
+</t>
+</div>
+</t>
+</t>
+</div>
+</body>
+</html>
+</template>
+</odoo>

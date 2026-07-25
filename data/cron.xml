@@ -1,0 +1,12 @@
+<odoo>
+<data noupdate="1">
+<record id="ir_cron_auto_close_feedback" model="ir.cron">
+<field name="name">XALA ECO: Tự động đóng Feedback sau 24h</field>
+<field name="model_id" ref="model_xalaeco_feedback"/>
+<field name="state">code</field>
+<field name="code">model._cron_auto_close_feedback()</field>
+<field name="interval_number">1</field>
+<field name="interval_type">hours</field>
+</record>
+</data>
+</odoo>

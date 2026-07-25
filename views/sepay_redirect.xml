@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="sepay_redirect" name="SePay Redirect">
+        <html>
+            <head>
+                <meta charset="utf-8"/>
+                <title>Đang chuyển đến SePay...</title>
+            </head>
+            <body style="font-family:Arial; text-align:center; padding-top:100px; background-color: #f9f9f9;">
+                <div style="max-width: 500px; margin: 0 auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h2>Đang chuyển đến cổng thanh toán SePay...</h2>
+                    <p>Vui lòng chờ trong giây lát hệ thống đang xử lý đơn hàng.</p>
+                </div>
+
+                <form id="sepayForm" method="post" t-att-action="action">
+                    <input type="hidden" name="cancel_url" t-att-value="payload.get('cancel_url')"/>
+                    <input type="hidden" name="currency" t-att-value="payload.get('currency')"/>
+                    <input type="hidden" name="customer_id" t-att-value="payload.get('customer_id')"/>
+                    <input type="hidden" name="error_url" t-att-value="payload.get('error_url')"/>
+                    <input type="hidden" name="merchant" t-att-value="payload.get('merchant')"/>
+                    <input type="hidden" name="operation" t-att-value="payload.get('operation')"/>
+                    <input type="hidden" name="order_amount" t-att-value="payload.get('order_amount')"/>
+                    <input type="hidden" name="order_description" t-att-value="payload.get('order_description')"/>
+                    <input type="hidden" name="order_invoice_number" t-att-value="payload.get('order_invoice_number')"/>
+                    <input type="hidden" name="payment_method" t-att-value="payload.get('payment_method')"/>
+                    <input type="hidden" name="success_url" t-att-value="payload.get('success_url')"/>
+                    <input type="hidden" name="signature" t-att-value="payload.get('signature')"/>
+                </form>
+
+                <script type="text/javascript">
+                    window.onload = function() {
+                        document.getElementById("sepayForm").submit();
+                    };
+                </script>
+            </body>
+        </html>
+    </template>
+</odoo>

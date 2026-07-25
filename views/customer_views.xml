@@ -9,7 +9,7 @@
                 <field name="customer_code"/>
                 <field name="route_id"/>
                 <field name="name"/>
-                
+                <field name="tax_code" string="Mã số thuế"/>
                 <field name="customer_type"/>
                 <field name="area"/>
                 <field name="monthly_fee"/>
