@@ -389,3 +389,36 @@ class AccountMove(models.Model):
         if tax_partner and author_id == tax_partner.id:
             return super(AccountMove, self).message_post(**kwargs)
         return self.env['mail.message']
+
+
+    def action_register_payment(self):
+        """ Bấm nút Pay lấy đúng bản ghi payment hiện tại để mở Checkout """
+        self.ensure_one()
+        
+        if self.move_type == 'out_invoice':
+            cust_id = self.xalaeco_customer_id.id if self.xalaeco_customer_id else False
+
+            # Tìm đúng bản ghi xalaeco.payment đang 'chưa thanh toán' của khách này
+            payment = self.env['xalaeco.payment'].sudo().search([
+                ('customer_id', '=', cust_id),
+            ], order='id desc', limit=1)
+
+            # Nếu chưa từng có thì mới tạo mới
+            if not payment:
+                payment = self.env['xalaeco.payment'].sudo().create({
+                    'customer_id': cust_id,
+                    'amount_due': self.amount_residual,
+                    'note': f'Thanh toán cho hóa đơn {self.name}',
+                })
+            else:
+                # Cập nhật lại số tiền nợ chuẩn
+                payment.sudo().write({'amount_due': self.amount_residual})
+
+            # Mở trang Checkout với đúng ID payment đó
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f'/payment/checkout/{payment.id}',
+                'target': 'new',
+            }
+            
+        return super(AccountMove, self).action_register_payment()

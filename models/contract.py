@@ -6,6 +6,7 @@ _logger = logging.getLogger(__name__)
 
 class XalaEcoContract(models.Model):
     _name = 'xalaeco.contract'
+    xalaeco_collection_unit_price = fields.Float(string="Đơn giá thu gom")
     _description = 'Hợp đồng dịch vụ XALA ECO'
     _order = 'priority_order asc, end_date asc'
 

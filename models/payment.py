@@ -1,10 +1,10 @@
-from odoo import models, fields, api
-from odoo.exceptions import UserError
-from datetime import date
-import urllib.parse
-import base64
-import requests
+from datetime import date, datetime
 import json
+import urllib.parse
+import requests
+
+from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 from . import vnpay_utils
 
@@ -26,10 +26,10 @@ class XalaEcoPayment(models.Model):
 
     payment_date = fields.Date(string='Ngày thanh toán')
     payment_method = fields.Selection([
-    ('cash', 'Tiền mặt'),
-    ('vnpay', 'VNPay'),
-    ('momo', 'MoMo'),
-    ('sepay', 'SePay'),
+        ('cash', 'Tiền mặt'),
+        ('vnpay', 'VNPay'),
+        ('momo', 'MoMo'),
+        ('sepay', 'SePay'),
     ], string="Phương thức")
 
     bank_transaction_code = fields.Char(string='Mã giao dịch ngân hàng')
@@ -42,10 +42,8 @@ class XalaEcoPayment(models.Model):
     qr_image = fields.Binary(string='QR thanh toán', compute='_compute_qr_image', store=False)
 
     vnp_txn_ref = fields.Char(string='Mã giao dịch VNPay (TxnRef)', copy=False)
-    
-    # CHỈNH SỬA NGÀY 20/07/2026: Thêm trường lưu mã giao dịch MoMo Sandbox
     momo_txn_ref = fields.Char(string='Mã giao dịch MoMo (TxnRef)', copy=False)
-    #--------Hết----------
+
     sepay_order_id = fields.Char(copy=False)
     sepay_order_code = fields.Char(copy=False)
     sepay_va_number = fields.Char(copy=False)
@@ -53,7 +51,6 @@ class XalaEcoPayment(models.Model):
 
     sepay_expired_at = fields.Datetime(string="Hết hạn SePay", copy=False)
     sepay_status = fields.Char(string="Trạng thái SePay", copy=False)
-
 
     state = fields.Selection([
         ('unpaid', 'Chưa thanh toán'),
@@ -64,12 +61,13 @@ class XalaEcoPayment(models.Model):
     note = fields.Text(string='Ghi chú đối soát')
     invoice_id = fields.Many2one('account.move', string='Hóa đơn liên kết')
 
+    # FIX: Bắt buộc thêm store=True để giao diện XML Odoo nhận diện ẩn/hiện nút
     xalaeco_contract_status = fields.Selection([
         ('active', 'Đang hiệu lực'),
         ('no_contract', 'Chưa có hợp đồng'),
-    ], string='Trạng thái hợp đồng', compute='_compute_xalaeco_contract_status')
+    ], string='Trạng thái hợp đồng', compute='_compute_xalaeco_contract_status', store=True)
 
-    # Các trường ảo phục vụ tự động import từ Excel không lỗi
+    # Các trường ảo phục vụ tự động import từ Excel
     payment_no = fields.Char(string='Mã thanh toán Excel')
     customer_code = fields.Char(string='Mã khách hàng Excel')
     customer_name = fields.Char(string='Tên khách hàng Excel')
@@ -86,19 +84,16 @@ class XalaEcoPayment(models.Model):
             elif vals.get('name', 'New') == 'New':
                 vals['name'] = self.env['ir.sequence'].next_by_code('xalaeco.payment') or 'New'
 
-            # Tự động gán khách hàng qua mã khách hàng
             if vals.get('customer_code') and not vals.get('customer_id'):
                 cust = self.env['xalaeco.customer'].search([('customer_code', '=', vals['customer_code'])], limit=1)
                 if cust:
                     vals['customer_id'] = cust.id
 
-            # Tự động gán hợp đồng qua mã hợp đồng
             if vals.get('contract_code') and not vals.get('contract_id'):
                 cont = self.env['xalaeco.contract'].search([('name', '=', vals['contract_code'])], limit=1)
                 if cont:
                     vals['contract_id'] = cont.id
 
-            # Tự động tìm/tạo kỳ thu phí
             if not vals.get('billing_id'):
                 period_name = vals.get('billing_period')
                 m_val = vals.get('month')
@@ -166,7 +161,7 @@ class XalaEcoPayment(models.Model):
     @api.depends('amount_due', 'amount_paid')
     def _compute_state(self):
         for record in self:
-            if not record.amount_paid:
+            if not record.amount_paid or record.amount_paid <= 0:
                 record.state = 'unpaid'
             elif record.amount_paid < record.amount_due:
                 record.state = 'partial'
@@ -178,30 +173,35 @@ class XalaEcoPayment(models.Model):
         for record in self:
             contract = record.contract_id or self.env['xalaeco.contract'].search([
                 ('customer_id', '=', record.customer_id.id),
-                ('state', 'in', ['active', 'near_expired']),
             ], limit=1)
-            if contract:
+            
+            # Cho phép nếu có contract
+            if contract and getattr(contract, 'state', 'active') not in ['cancel', 'draft']:
                 record.xalaeco_contract_status = 'active'
             else:
                 record.xalaeco_contract_status = 'no_contract'
 
     def action_confirm_paid(self):
+        """Xác nhận thanh toán thủ công"""
         for record in self:
-            record.amount_paid = record.amount_due
-            record.payment_date = date.today()
-            record.payment_method = 'cash'
-            record.note = 'Đã xác nhận thu đủ tiền.'
+            record.write({
+                'amount_paid': record.amount_due,
+                'payment_date': fields.Date.today(),
+                'payment_method': 'sepay',
+                'note': 'Đã xác nhận thanh toán.',
+            })
         return True
 
     def action_reset_unpaid(self):
         for record in self:
-            record.amount_paid = 0
-            record.payment_date = False
-            record.bank_transaction_code = False
-            record.payment_method = False
-            record.note = 'Đã đưa về trạng thái chưa thanh toán.'
+            record.write({
+                'amount_paid': 0.0,
+                'payment_date': False,
+                'bank_transaction_code': False,
+                'payment_method': False,
+                'note': 'Đã đưa về trạng thái chưa thanh toán.',
+            })
         return True
-    
 
     def action_pay_vnpay(self):
         self.ensure_one()
@@ -214,7 +214,6 @@ class XalaEcoPayment(models.Model):
         if not tmn_code or not secret_key:
             raise UserError('Chưa cấu hình vnp_TmnCode hoặc vnp_HashSecret. Vào Settings > Technical > System Parameters để thêm.')
 
-        from datetime import datetime
         now = datetime.now()
         txn_ref = now.strftime('%d%H%M%S')
         self.vnp_txn_ref = txn_ref
@@ -228,7 +227,7 @@ class XalaEcoPayment(models.Model):
             'vnp_TxnRef': txn_ref,
             'vnp_OrderInfo': f'Thanh toan cho ma GD:{txn_ref}',
             'vnp_OrderType': 'other',
-            'vnp_Amount': int((self.debt_amount or 0) * 100),
+            'vnp_Amount': int((self.debt_amount or self.amount_due or 0) * 100),
             'vnp_ReturnUrl': f'{base_url}/payment/vnpay_return?db=xala_chuan',
             'vnp_IpAddr': '127.0.0.1',
             'vnp_CreateDate': now.strftime('%Y%m%d%H%M%S'),
@@ -242,18 +241,17 @@ class XalaEcoPayment(models.Model):
             'target': 'self',
         }
 
-def action_create_invoice(self):
+    def action_create_invoice(self):
         self.ensure_one()
         if self.invoice_id:
             raise UserError('Hóa đơn đã được tạo cho lượt thanh toán này!')
 
-        contract = self.env['xalaeco.contract'].search([
+        contract = self.contract_id or self.env['xalaeco.contract'].search([
             ('customer_id', '=', self.customer_id.id),
-            ('state', 'in', ['active', 'near_expired']),
         ], limit=1)
 
         if not contract:
-            raise UserError(f"Khách hàng '{self.customer_id.name}' không có hợp đồng đang hiệu lực. Không thể xuất hóa đơn.")
+            raise UserError(f"Khách hàng '{self.customer_id.name}' chưa gắn hợp đồng. Không thể xuất hóa đơn.")
 
         journal = self.env['account.journal'].search([
             ('type', '=', 'sale'),
@@ -275,37 +273,26 @@ def action_create_invoice(self):
             'partner_id': partner.id,
             'journal_id': journal.id,
             'xalaeco_customer_id': self.customer_id.id,
-            'xalaeco_tax_code': self.customer_id.tax_code,
+            'xalaeco_tax_code': getattr(self.customer_id, 'tax_code', False),
             'invoice_date': fields.Date.today(),
             'invoice_line_ids': [],
         }
 
-        customer_type = self.customer_id.customer_type
+        customer_type = getattr(self.customer_id, 'customer_type', 'company')
 
         if customer_type == 'household':
             invoice_vals['invoice_line_ids'].append((0, 0, {
                 'name': 'Phí dịch vụ thu gom rác thải sinh hoạt (Hộ dân)',
                 'quantity': 1.0,
-                'price_unit': self.customer_id.monthly_fee or 84000.0,
+                'price_unit': getattr(self.customer_id, 'monthly_fee', 84000.0) or 84000.0,
             }))
         else:
-            contract = self.contract_id or self.env['xalaeco.contract'].search([
-                ('customer_id', '=', self.customer_id.id),
-                ('state', '=', 'active'),
-            ], limit=1)
-
-            if contract:
-                invoice_vals['invoice_line_ids'].append((0, 0, {
-                    'name': 'Dịch vụ thu gom và vận chuyển rác thải sinh hoạt',
-                    'quantity': 1.0,
-                    'price_unit': contract.service_fee or (contract.collection_fee + contract.transport_fee) or 0.0,
-                }))
-            else:
-                invoice_vals['invoice_line_ids'].append((0, 0, {
-                    'name': 'Dịch vụ thu gom và vận chuyển rác thải sinh hoạt',
-                    'quantity': 1.0,
-                    'price_unit': self.customer_id.monthly_fee or 0.0,
-                }))
+            price = getattr(contract, 'service_fee', 0.0) or (getattr(contract, 'collection_fee', 0.0) + getattr(contract, 'transport_fee', 0.0)) or getattr(self.customer_id, 'monthly_fee', 0.0)
+            invoice_vals['invoice_line_ids'].append((0, 0, {
+                'name': 'Dịch vụ thu gom và vận chuyển rác thải sinh hoạt',
+                'quantity': 1.0,
+                'price_unit': price,
+            }))
 
         invoice = self.env['account.move'].create(invoice_vals)
         self.invoice_id = invoice.id
@@ -318,23 +305,19 @@ def action_create_invoice(self):
             'res_id': invoice.id,
             'target': 'current',
         }
-# Thanh toán MoMo Sandbox
-def action_pay_momo(self):
+
+    def action_pay_momo(self):
         self.ensure_one()
         ICP = self.env['ir.config_parameter'].sudo()
         base_url = ICP.get_param('web.base.url')
 
-        payment_url = f"{base_url}/payment/momo_direct/{self.id}"
-
         return {
             'type': 'ir.actions.act_url',
-            'url': payment_url,
+            'url': f"{base_url}/payment/momo_direct/{self.id}",
             'target': 'self',
         }
 
-
-    # Điều hướng sang trang thanh toán chung
-def action_pay_online(self):
+    def action_pay_online(self):
         self.ensure_one()
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
@@ -344,8 +327,7 @@ def action_pay_online(self):
             'target': 'self',
         }
 
-
-def action_pay_sepay(self):
+    def action_pay_sepay(self):
         self.ensure_one()
         base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
 

@@ -4,8 +4,8 @@
         <field name="name">Hóa đơn XALA ECO</field>
         <field name="model">account.move</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
-        <field name="report_file">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="report_name">xalaeco_management.report_xalaeco_invoice_template</field>
+        <field name="report_file">xalaeco_management.report_xalaeco_invoice_template</field>
         <field name="print_report_name">'Hoa_don_XALA_ECO_%s' % (object.name or '')</field>
         <field name="binding_model_id" ref="account.model_account_move"/>
         <field name="binding_type">report</field>
@@ -13,13 +13,13 @@
 
     <!-- Ghi đè hành động in hóa đơn mặc định của Odoo -->
     <record id="account.account_invoices" model="ir.actions.report">
-        <field name="report_name">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
-        <field name="report_file">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="report_name">xalaeco_management.report_xalaeco_invoice_template</field>
+        <field name="report_file">xalaeco_management.report_xalaeco_invoice_template</field>
     </record>
 
     <record id="account.account_invoices_without_payment" model="ir.actions.report">
-        <field name="report_name">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
-        <field name="report_file">XALA_ECO_ODOO.report_xalaeco_invoice_template</field>
+        <field name="report_name">xalaeco_management.report_xalaeco_invoice_template</field>
+        <field name="report_file">xalaeco_management.report_xalaeco_invoice_template</field>
     </record>
 
     <!-- Định nghĩa template báo cáo standalone -->
@@ -32,7 +32,7 @@
                         <!-- PHẦN HEADER: LOGO, TIÊU ĐỀ HÓA ĐƠN & THÔNG TIN TRA CỨU -->
                         <div style="width: 100%; height: 75px; border-bottom: 1.5px solid #1b5e20; padding-bottom: 5px; margin-bottom: 8px;">
                             <div style="float: left; width: 30%; text-align: left;">
-                                <img src="/XALA_ECO_ODOO/static/src/img/logo.png" style="width: 130px; height: 50px; object-fit: contain; display: block; margin-bottom: 2px;"/>
+                                <img src="/xalaeco_management/static/src/img/logo.png" style="width: 130px; height: 50px; object-fit: contain; display: block; margin-bottom: 2px;"/>
                                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: bold; font-size: 9px; color: #1b5e20; letter-spacing: 0.5px; padding-left: 2px;">VÌ MÔI TRƯỜNG XANH</div>
                             </div>
 
@@ -77,7 +77,7 @@
                                 <div>Tài khoản: <strong t-esc="o.company_id.xalaeco_bank_account or '1042253873'"/> Ngân hàng: <span t-esc="o.company_id.xalaeco_bank_name or 'Vietcombank'"/></div>
                             </div>
                             <div style="float: right; width: 18%; text-align: center; box-sizing: border-box; margin-top: 2px;">
-                                <img src="/XALA_ECO_ODOO/static/src/img/qr.png" style="width: 72px; height: 72px; display: inline-block; object-fit: contain;"/>
+                                <img src="/xalaeco_management/static/src/img/qr.png" style="width: 72px; height: 72px; display: inline-block; object-fit: contain;"/>
                                 <div style="font-size: 7.5px; font-weight: bold; color: #1b5e20; margin-top: 4px; line-height: 1.1; text-align: center;">Mã tra cứu hóa đơn</div>
                             </div>
                             <div style="clear: both;"/>

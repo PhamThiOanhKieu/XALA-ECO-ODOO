@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
-# ###############################################################################
-# CHỈNH SỬA NGÀY 20/07/2026: TẠO FILE ĐIỀU HƯỚNG TRANG THANH TOÁN TRUNG GIAN CHUNG
-# ###############################################################################
-
-from odoo import http
+from odoo import http, fields
 from odoo.http import request
 import urllib.parse
 import requests
+
 class CheckoutController(http.Controller):
 
     @http.route('/payment/checkout/<int:payment_id>', type='http', auth='public', csrf=False)
     def payment_checkout(self, payment_id, **kwargs):
-        # Lấy thông tin hóa đơn cần thanh toán
         payment = request.env['xalaeco.payment'].sudo().browse(payment_id)
         if not payment.exists():
             return "<h1>Lỗi: Hóa đơn thanh toán không tồn tại!</h1>"
 
-        if payment.state == 'paid':
+        debt_amount = getattr(payment, 'debt_amount', 0.0) or 0.0
+        amount_paid = getattr(payment, 'amount_paid', 0.0) or 0.0
+        current_state = getattr(payment, 'state', '')
+
+        # 🔥 ĐIỀU KIỆN CHỈ HIỆN "ĐÃ THANH TOÁN" KHÍ THỰC SỰ NỢ = 0 VÀ ĐÃ CÓ TIỀN TRẢ
+        if debt_amount <= 0 and (amount_paid > 0 or current_state == 'paid'):
             return """
             <html>
                 <head>
@@ -24,7 +25,7 @@ class CheckoutController(http.Controller):
                     <title>Hóa đơn đã được thanh toán</title>
                     <style>
                         body { font-family: 'Segoe UI', Roboto, sans-serif; text-align: center; padding-top: 100px; background-color: #f8f9fa; color: #333; }
-                        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: inline-block; max-width: 450px; }
+                        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: inline-block; max-width: 450px; width: 90%; }
                         h1 { color: #28a745; margin-bottom: 10px; }
                         a { display: inline-block; margin-top: 20px; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; }
                     </style>
@@ -33,20 +34,18 @@ class CheckoutController(http.Controller):
                     <div class="card">
                         <h1>✓ Đã Thanh Toán</h1>
                         <p>Hóa đơn <strong>#""" + str(payment.name) + """</strong> đã hoàn tất thanh toán trước đó.</p>
-                        <!-- CHỈNH SỬA NGÀY 21/07/2026: Sửa link quay lại Odoo -->
-                        <a href="/odoo/action-156">Quay lại Odoo</a>
-                        <!-- --------Hết---------- -->
+                        <a href="https://jump-darkness-rubdown.ngrok-free.dev/odoo/action-156">Quay lại Odoo</a>
                     </div>
                 </body>
             </html>
             """
 
         # Định dạng tiền tệ VND
-        amount_fmt = f"{int(payment.debt_amount or 0):,}"
-        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        amount_fmt = f"{int(debt_amount if debt_amount > 0 else payment.amount_due):,}"
+        
+        # 🔥 ÉP CỐ ĐỊNH BASE_URL SANG NGROK ĐỂ KHÔNG BỊ LỖI LOCALHOST
+        base_url = "https://jump-darkness-rubdown.ngrok-free.dev"
 
-
-        # Trả về trang Web Checkout phong cách Premium, hiện đại
         html = f"""
         <html>
             <head>
@@ -107,7 +106,6 @@ class CheckoutController(http.Controller):
                     .label {{ color: #a0a0b0; }}
                     .val {{ font-weight: 600; color: #fff; }}
                     .val.price {{ font-size: 20px; color: #00f2fe; }}
-                    
                     .section-title {{
                         font-size: 15px;
                         color: #a0a0b0;
@@ -117,7 +115,6 @@ class CheckoutController(http.Controller):
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                     }}
-                    
                     .btn-list {{
                         display: flex;
                         flex-direction: column;
@@ -138,98 +135,33 @@ class CheckoutController(http.Controller):
                         border: none;
                         cursor: pointer;
                     }}
-                    .btn-vnpay {{
-                        background: #005a9e;
-                        color: #fff;
-                    }}
-                    .btn-vnpay:hover {{
-                        background: #0078d4;
-                        transform: translateY(-2px);
-                        box-shadow: 0 5px 15px rgba(0, 90, 158, 0.4);
-                    }}
-                    .btn-momo {{
-                        background: #a50064;
-                        color: #fff;
-                    }}
-                    
-                    .btn-momo:hover {{
-                        background: #c20075;
-                        transform: translateY(-2px);
-                        box-shadow: 0 5px 15px rgba(165, 0, 100, 0.4);
-                    }}
-                    .btn-sepay {{
-                        background:#00a86b;
-                        color:white;
-                    }}
-                    
-                    .btn-sepay:hover {{
-                        background:#008c59;
-                        transform:translateY(-2px);
-                    }}
-
-                    .qr-section {{
-                        background: rgba(255, 255, 255, 0.02);
-                        border-radius: 16px;
-                        padding: 20px;
-                        border: 1px rgba(255, 255, 255, 0.04) solid;
-                    }}
-                    .qr-box {{
-                        background: #fff;
-                        padding: 10px;
-                        border-radius: 12px;
-                        display: inline-block;
-                        margin-bottom: 15px;
-                    }}
-                    .qr-box img {{
-                        width: 200px;
-                        height: 200px;
-                        display: block;
-                    }}
-                    .qr-info {{
-                        font-size: 13px;
-                        color: #a0a0b0;
-                        line-height: 1.6;
-                        text-align: left;
-                    }}
-                    .qr-info strong {{
-                        color: #fff;
-                    }}
+                    .btn-vnpay {{ background: #005a9e; color: #fff; }}
+                    .btn-momo {{ background: #a50064; color: #fff; }}
+                    .btn-sepay {{ background: #00a86b; color: white; }}
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="logo">XALA ECO CHECKOUT</div>
-                    
                     <div class="bill-info">
                         <div class="bill-row">
                             <span class="label">Khách hàng:</span>
-                            <span class="val">{payment.customer_id.name}</span>
+                            <span class="val">{payment.customer_id.name if payment.customer_id else ''}</span>
                         </div>
                         <div class="bill-row">
                             <span class="label">Mã hóa đơn:</span>
                             <span class="val">#{payment.name}</span>
                         </div>
                         <div class="bill-row">
-                            <span class="label">Kỳ thu phí:</span>
-                            <span class="val">Tháng {payment.billing_id.month}/{payment.billing_id.year}</span>
-                        </div>
-                        <div class="bill-row">
                             <span class="label">Số tiền cần thanh toán:</span>
                             <span class="val price">{amount_fmt} VNĐ</span>
                         </div>
                     </div>
-
                     <div class="section-title">Chọn ví hoặc cổng thanh toán</div>
                     <div class="btn-list">
-                    <a href="{base_url}/payment/vnpay_direct/{payment.id}" class="pay-btn btn-vnpay">
-                    Thanh toán qua Cổng VNPay
-                    </a>
-                    <a href="{base_url}/payment/momo_direct/{payment.id}" class="pay-btn btn-momo">
-                    Thanh toán qua Ví MoMo
-                    </a>
-                    <a href="{base_url}/payment/sepay_direct/{payment.id}" class="pay-btn btn-sepay">
-                    Thanh toán qua SePay
-                    </a>
+                        <a href="{base_url}/payment/vnpay_direct/{payment.id}" class="pay-btn btn-vnpay">Thanh toán qua Cổng VNPay</a>
+                        <a href="{base_url}/payment/momo_direct/{payment.id}" class="pay-btn btn-momo">Thanh toán qua Ví MoMo</a>
+                        <a href="{base_url}/payment/sepay_direct/{payment.id}" class="pay-btn btn-sepay">Thanh toán qua SePay</a>
                     </div>
                 </div>
             </body>
@@ -237,8 +169,5 @@ class CheckoutController(http.Controller):
         """
         return request.make_response(
             html,
-            headers=[
-                ('Content-Type', 'text/html'),
-                ('ngrok-skip-browser-warning', 'true')
-            ]
+            headers=[('Content-Type', 'text/html'), ('ngrok-skip-browser-warning', 'true')]
         )
