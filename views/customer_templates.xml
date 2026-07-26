@@ -132,4 +132,15 @@ Lịch sử của bạn
 </body>
 </html>
 </template>
+
+    <template id="portal_invoice_page_pay_now_direct" inherit_id="account_payment.portal_invoice_page_inherit_payment" priority="99">
+        <xpath expr="//a[@data-bs-target='#pay_with']" position="replace">
+            <a t-if="invoice._has_to_be_paid()"
+               t-attf-href="/payment/checkout_invoice/#{invoice.id}"
+               class="btn btn-primary w-100 mb-2"
+               role="button">
+                <i class="fa fa-fw fa-arrow-circle-right"/> Pay Now
+            </a>
+        </xpath>
+    </template>
 </odoo>

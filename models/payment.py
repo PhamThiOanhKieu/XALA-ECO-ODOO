@@ -181,8 +181,18 @@ class XalaEcoPayment(models.Model):
             else:
                 record.xalaeco_contract_status = 'no_contract'
 
+    def _check_invoice_before_payment(self):
+        for record in self:
+            has_contract = (record.xalaeco_contract_status == 'active') or self.env['xalaeco.contract'].search([
+                ('customer_id', '=', record.customer_id.id),
+                ('state', 'in', ['active', 'near_expired']),
+            ], limit=1)
+            if has_contract and not record.invoice_id:
+                raise UserError(f"Khách hàng '{record.customer_id.name or ''}' có hợp đồng. Phải tạo hóa đơn trước mới được thanh toán!")
+
     def action_confirm_paid(self):
         """Xác nhận thanh toán thủ công"""
+        self._check_invoice_before_payment()
         for record in self:
             record.write({
                 'amount_paid': record.amount_due,
@@ -205,6 +215,7 @@ class XalaEcoPayment(models.Model):
 
     def action_pay_vnpay(self):
         self.ensure_one()
+        self._check_invoice_before_payment()
         ICP = self.env['ir.config_parameter'].sudo()
         tmn_code = ICP.get_param('xalaeco.vnp_tmn_code')
         secret_key = ICP.get_param('xalaeco.vnp_hash_secret')
@@ -308,6 +319,7 @@ class XalaEcoPayment(models.Model):
 
     def action_pay_momo(self):
         self.ensure_one()
+        self._check_invoice_before_payment()
         ICP = self.env['ir.config_parameter'].sudo()
         base_url = ICP.get_param('web.base.url')
 
@@ -319,6 +331,7 @@ class XalaEcoPayment(models.Model):
 
     def action_pay_online(self):
         self.ensure_one()
+        self._check_invoice_before_payment()
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
         return {
@@ -329,6 +342,7 @@ class XalaEcoPayment(models.Model):
 
     def action_pay_sepay(self):
         self.ensure_one()
+        self._check_invoice_before_payment()
         base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
 
         return {

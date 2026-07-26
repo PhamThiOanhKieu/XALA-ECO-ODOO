@@ -30,22 +30,23 @@
                             string="Thanh toán TKNH"
                             type="object"
                             class="btn-primary"
-                            invisible="state == 'paid'"/>
+                            invisible="state == 'paid' or (xalaeco_contract_status == 'active' and invoice_id == False)"/>
                     <button name="action_confirm_paid"
                             string="Xác nhận đã thu"
                             type="object"
                             class="btn-primary"
-                            invisible="payment_method == 'vnpay'"/>
+                            invisible="payment_method == 'vnpay' or (xalaeco_contract_status == 'active' and invoice_id == False)"/>
                     <button name="action_reset_unpaid"
                             string="Đưa về chưa thanh toán"
                             type="object"
                             class="btn-secondary"
-                            invisible="payment_method == 'vnpay'"/>
+                            invisible="payment_method == 'vnpay' or (xalaeco_contract_status == 'active' and invoice_id == False)"/>
                     <button name="action_create_invoice"
                             string="Tạo hóa đơn"
                             type="object"
                             class="btn-success"
                             invisible="invoice_id != False"/>
+                    <field name="xalaeco_contract_status" invisible="1"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="unpaid,partial,paid"/>
                 </header>
@@ -83,10 +84,34 @@
         </field>
     </record>
 
+    <record id="view_xalaeco_payment_search" model="ir.ui.view">
+        <field name="name">xalaeco.payment.search</field>
+        <field name="model">xalaeco.payment</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm thanh toán">
+                <field name="name" string="Mã thanh toán"/>
+                <field name="customer_id" string="Khách hàng"/>
+                <field name="billing_id" string="Kỳ thu phí"/>
+                <field name="payment_method" string="Phương thức"/>
+                
+                <separator/>
+                <filter string="Chưa thanh toán" name="filter_unpaid" domain="[('state', '!=', 'paid')]"/>
+                <filter string="Đã thanh toán" name="filter_paid" domain="[('state', '=', 'paid')]"/>
+                <filter string="Còn nợ" name="filter_debt" domain="[('debt_amount', '>', 0)]"/>
+                
+                <separator/>
+                <filter string="Trạng thái" name="group_state" domain="[]" context="{'group_by': 'state'}"/>
+                <filter string="Kỳ thu phí" name="group_billing" domain="[]" context="{'group_by': 'billing_id'}"/>
+                <filter string="Khách hàng" name="group_customer" domain="[]" context="{'group_by': 'customer_id'}"/>
+            </search>
+        </field>
+    </record>
+
     <record id="action_xalaeco_payment" model="ir.actions.act_window">
         <field name="name">Thanh toán</field>
         <field name="res_model">xalaeco.payment</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_xalaeco_payment_search"/>
     </record>
 
     <record id="action_xalaeco_debt" model="ir.actions.act_window">

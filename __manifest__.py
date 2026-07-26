@@ -4,7 +4,7 @@
     'summary': 'Quản lý khách hàng, hợp đồng, thanh toán QR và doanh thu cho XALA ECO',
     'category': 'Management',
     'author': 'Group 2',
-    'depends': ['base', 'web', 'mail', 'account'],
+    'depends': ['base', 'web', 'mail', 'account', 'account_payment'],
     'data': [
         'security/ir.model.access.csv',
         'data/sequence.xml',
@@ -35,7 +35,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'xalaeco_management/static/src/xalaeco_dashboard.js',
+            'XALA_ECO_ODOO/static/src/xalaeco_dashboard.js',
         ],
     },
     'installable': True,

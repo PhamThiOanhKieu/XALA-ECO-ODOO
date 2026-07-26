@@ -6,11 +6,76 @@ import requests
 
 class CheckoutController(http.Controller):
 
+    @http.route(['/payment/checkout_invoice/<int:invoice_id>', '/payment/checkout_invoice/<int:invoice_id>/pay'], type='http', auth='public', csrf=False)
+    def payment_checkout_invoice(self, invoice_id, **kwargs):
+        invoice = request.env['account.move'].sudo().browse(invoice_id)
+        if not invoice.exists():
+            return "<h1>Lỗi: Hóa đơn không tồn tại!</h1>"
+            
+        payment = request.env['xalaeco.payment'].sudo().search([('invoice_id', '=', invoice.id)], limit=1)
+        if not payment:
+            customer = request.env['xalaeco.customer'].sudo().search([('phone', '=', invoice.partner_id.phone)], limit=1)
+            payment = request.env['xalaeco.payment'].sudo().create({
+                'invoice_id': invoice.id,
+                'customer_id': customer.id if customer else False,
+                'name': invoice.name or 'PXK',
+                'debt_amount': invoice.amount_residual,
+                'amount_due': invoice.amount_residual,
+                'state': 'unpaid',
+            })
+        return self.payment_checkout(payment.id, **kwargs)
+
     @http.route('/payment/checkout/<int:payment_id>', type='http', auth='public', csrf=False)
     def payment_checkout(self, payment_id, **kwargs):
         payment = request.env['xalaeco.payment'].sudo().browse(payment_id)
-        if not payment.exists():
-            return "<h1>Lỗi: Hóa đơn thanh toán không tồn tại!</h1>"
+        has_contract = (getattr(payment, 'xalaeco_contract_status', '') == 'active') or request.env['xalaeco.contract'].sudo().search([
+            ('customer_id', '=', payment.customer_id.id if payment.customer_id else False),
+            ('state', 'in', ['active', 'near_expired']),
+        ], limit=1)
+
+        if has_contract and not payment.invoice_id and getattr(payment, 'state', '') != 'paid':
+            return """
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <title>Yêu cầu xuất hóa đơn</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Roboto, sans-serif; text-align: center; padding-top: 100px; background-color: #f8f9fa; color: #333; }
+                        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: inline-block; max-width: 500px; width: 90%; }
+                        h1 { color: #dc3545; margin-bottom: 15px; font-size: 24px; }
+                        p { font-size: 16px; line-height: 1.5; color: #555; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h1>⚠️ Khách Hàng Có Hợp Đồng</h1>
+                        <p>Khách hàng <strong>""" + str(payment.customer_id.name if payment.customer_id else '') + """</strong> có hợp đồng trong hệ thống. Cần xuất hóa đơn trước mới có thể thực hiện thanh toán.</p>
+                    </div>
+                </body>
+            </html>
+            """
+
+        if payment.invoice_id and payment.invoice_id.move_type == 'out_invoice' and not payment.invoice_id.xalaeco_tax_verification_code and getattr(payment, 'state', '') != 'paid':
+            return """
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <title>Yêu cầu gửi cơ quan thuế</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Roboto, sans-serif; text-align: center; padding-top: 100px; background-color: #f8f9fa; color: #333; }
+                        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: inline-block; max-width: 500px; width: 90%; }
+                        h1 { color: #dc3545; margin-bottom: 15px; font-size: 24px; }
+                        p { font-size: 16px; line-height: 1.5; color: #555; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h1>⚠️ Chưa Gửi Cơ Quan Thuế</h1>
+                        <p>Hóa đơn <strong>""" + str(payment.invoice_id.name or '') + """</strong> chưa được gửi cơ quan thuế và chưa có mã xác thực. Cần bấm "Gửi cơ quan thuế" trên hóa đơn trước mới có thể thực hiện thanh toán Pay Now.</p>
+                    </div>
+                </body>
+            </html>
+            """
 
         debt_amount = getattr(payment, 'debt_amount', 0.0) or 0.0
         amount_paid = getattr(payment, 'amount_paid', 0.0) or 0.0
@@ -18,6 +83,7 @@ class CheckoutController(http.Controller):
 
         # 🔥 ĐIỀU KIỆN CHỈ HIỆN "ĐÃ THANH TOÁN" KHÍ THỰC SỰ NỢ = 0 VÀ ĐÃ CÓ TIỀN TRẢ
         if debt_amount <= 0 and (amount_paid > 0 or current_state == 'paid'):
+            back_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
             return """
             <html>
                 <head>
@@ -34,7 +100,7 @@ class CheckoutController(http.Controller):
                     <div class="card">
                         <h1>✓ Đã Thanh Toán</h1>
                         <p>Hóa đơn <strong>#""" + str(payment.name) + """</strong> đã hoàn tất thanh toán trước đó.</p>
-                        <a href="https://jump-darkness-rubdown.ngrok-free.dev/odoo/action-156">Quay lại Odoo</a>
+                        <a href=\"""" + back_url + """/odoo/action-156">Quay lại Odoo</a>
                     </div>
                 </body>
             </html>
@@ -42,9 +108,11 @@ class CheckoutController(http.Controller):
 
         # Định dạng tiền tệ VND
         amount_fmt = f"{int(debt_amount if debt_amount > 0 else payment.amount_due):,}"
-        
-        # 🔥 ÉP CỐ ĐỊNH BASE_URL SANG NGROK ĐỂ KHÔNG BỊ LỖI LOCALHOST
-        base_url = "https://jump-darkness-rubdown.ngrok-free.dev"
+
+        # Lấy base_url động từ cấu hình hệ thống (System Parameters > web.base.url).
+        # Không hardcode domain/ngrok trong code — nếu domain đổi (hoặc tunnel ngrok đổi
+        # sau mỗi lần restart), chỉ cần sửa 1 chỗ duy nhất trong Settings, không cần sửa code.
+        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
 
         html = f"""
         <html>

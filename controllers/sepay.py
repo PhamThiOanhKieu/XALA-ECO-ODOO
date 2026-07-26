@@ -31,8 +31,21 @@ class SePayController(http.Controller):
         secret_key = ICP.get_param("xalaeco.sepay_secret_key")
 
         base_url = ICP.get_param("web.base.url")
-        if "localhost" in base_url:
-            base_url = "https://jump-darkness-rubdown.ngrok-free.dev"
+        if "localhost" in base_url or "127.0.0.1" in base_url:
+            # SePay bắt buộc success_url/webhook phải là URL công khai (không được localhost).
+            # Trước đây domain ngrok cá nhân bị gắn cứng thẳng trong code — rất dễ bị lộ domain
+            # dev nội bộ, và khi tunnel đổi (ngrok free đổi domain mỗi lần restart) sẽ phải sửa
+            # code + build lại. Giờ đọc từ tham số hệ thống, cấu hình ở
+            # Settings > Technical > System Parameters > 'xalaeco.public_base_url'.
+            public_override = ICP.get_param("xalaeco.public_base_url")
+            if public_override:
+                base_url = public_override
+            else:
+                return request.make_response(
+                    "<h3>Chưa cấu hình URL công khai (web.base.url đang là localhost). "
+                    "Vui lòng cấu hình tham số hệ thống 'xalaeco.public_base_url' "
+                    "(ví dụ domain thật hoặc URL ngrok hiện tại) trước khi thanh toán qua SePay.</h3>"
+                )
 
         base_url = base_url.rstrip("/")
 
@@ -87,7 +100,7 @@ class SePayController(http.Controller):
         payload["signature"] = signature
 
         return request.render(
-            "xalaeco_management.sepay_redirect",
+            "XALA_ECO_ODOO.sepay_redirect",
             {
                 "action": "https://pay-sandbox.sepay.vn/v1/checkout/init",
                 "payload": payload,

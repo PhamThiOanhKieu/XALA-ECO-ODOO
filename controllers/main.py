@@ -9,7 +9,7 @@ import json
 import logging
 _logger = logging.getLogger(__name__)
 
-from odoo.addons.xalaeco_management.models import vnpay_utils
+from ..models import vnpay_utils
 
 SIM_TARGETS = {}
 

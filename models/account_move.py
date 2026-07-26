@@ -23,7 +23,7 @@ class AccountMove(models.Model):
     @api.depends('xalaeco_lookup_code')
     def _compute_xalaeco_lookup_qr_code(self):
         for move in self:
-            code_val = f"https://tracuuhoadon.gdt.gov.vn?code={move.xalaeco_lookup_code or '0401234567'}"
+            code_val = f"https://tracuuhoadon.gdt.gov.vn?code={move.xalaeco_lookup_code or '0311234567'}"
             barcode_raw = self.env['ir.actions.report'].barcode('QR', code_val)
             move.xalaeco_lookup_qr_code = base64.b64encode(barcode_raw)
 
@@ -59,7 +59,7 @@ class AccountMove(models.Model):
             move.xalaeco_invoice_number = move.name or ''
             move.xalaeco_issue_date = move.invoice_date
             move.xalaeco_company_tax_code = (
-                move.company_id.xalaeco_tax_code or move.company_id.vat or '0401234567'
+                move.company_id.xalaeco_tax_code or move.company_id.vat or '0311234567'
             )
 
     @api.depends('state', 'xalaeco_is_sent_to_tax', 'xalaeco_tax_verification_code')
@@ -296,7 +296,7 @@ class AccountMove(models.Model):
         
         payload = {
             'tax_code': self.xalaeco_tax_code or self.partner_id.vat or '',
-            'company_tax_code': self.company_id.xalaeco_tax_code or self.company_id.vat or '0401234567',
+            'company_tax_code': self.company_id.xalaeco_tax_code or self.company_id.vat or '0311234567',
             'invoice_no': self.name,
             'amount': self.amount_total,
             'date': str(self.invoice_date or datetime.now().date())
@@ -390,12 +390,43 @@ class AccountMove(models.Model):
             return super(AccountMove, self).message_post(**kwargs)
         return self.env['mail.message']
 
+    def unlink(self):
+        context = dict(self.env.context, force_delete=True, skip_invoice_sync=True, dynamic_unlink=True)
+        moves = self.with_context(context)
+        for move in moves:
+            if move.state == 'posted':
+                move.sudo().write({
+                    'state': 'draft',
+                    'posted_before': False,
+                    'inalterable_hash': False,
+                })
+            if move.line_ids:
+                move.line_ids.sudo().remove_move_reconcile()
+        return super(AccountMove, moves).unlink()
+
+
+
+    def _has_to_be_paid(self):
+        res = super(AccountMove, self)._has_to_be_paid()
+        for move in self:
+            if move.move_type == 'out_invoice' and not move.xalaeco_tax_verification_code:
+                return False
+        return res
+
+    def _get_online_payment_error(self):
+        res = super(AccountMove, self)._get_online_payment_error()
+        if self.move_type == 'out_invoice' and not self.xalaeco_tax_verification_code:
+            return _("Hóa đơn chưa được gửi cơ quan thuế và chưa có mã xác thực. Vui lòng gửi cơ quan thuế trước khi thanh toán!")
+        return res
 
     def action_register_payment(self):
         """ Bấm nút Pay lấy đúng bản ghi payment hiện tại để mở Checkout """
         self.ensure_one()
         
         if self.move_type == 'out_invoice':
+            if not self.xalaeco_tax_verification_code:
+                raise UserError(_("Hóa đơn '%s' chưa được gửi cơ quan thuế hoặc chưa có mã xác thực. Vui lòng bấm 'Gửi cơ quan thuế' trước khi thanh toán (Pay)!") % (self.name or ''))
+
             cust_id = self.xalaeco_customer_id.id if self.xalaeco_customer_id else False
 
             # Tìm đúng bản ghi xalaeco.payment đang 'chưa thanh toán' của khách này
