@@ -18,7 +18,7 @@ class SePayController(http.Controller):
         auth="public",
         website=True,
         csrf=False,
-    )
+    ) 
     def sepay_direct(self, payment_id, **kwargs):
         payment = request.env["xalaeco.payment"].sudo().browse(payment_id)
 
@@ -30,29 +30,11 @@ class SePayController(http.Controller):
         merchant_id = ICP.get_param("xalaeco.sepay_merchant_id")
         secret_key = ICP.get_param("xalaeco.sepay_secret_key")
 
-        base_url = ICP.get_param("web.base.url")
-        if "localhost" in base_url or "127.0.0.1" in base_url:
-            # SePay bắt buộc success_url/webhook phải là URL công khai (không được localhost).
-            # Trước đây domain ngrok cá nhân bị gắn cứng thẳng trong code — rất dễ bị lộ domain
-            # dev nội bộ, và khi tunnel đổi (ngrok free đổi domain mỗi lần restart) sẽ phải sửa
-            # code + build lại. Giờ đọc từ tham số hệ thống, cấu hình ở
-            # Settings > Technical > System Parameters > 'xalaeco.public_base_url'.
-            public_override = ICP.get_param("xalaeco.public_base_url")
-            if public_override:
-                base_url = public_override
-            else:
-                return request.make_response(
-                    "<h3>Chưa cấu hình URL công khai (web.base.url đang là localhost). "
-                    "Vui lòng cấu hình tham số hệ thống 'xalaeco.public_base_url' "
-                    "(ví dụ domain thật hoặc URL ngrok hiện tại) trước khi thanh toán qua SePay.</h3>"
-                )
-
+        base_url = ICP.get_param("xalaeco.public_base_url") or "https://doable-negate-discuss.ngrok-free.dev"
         base_url = base_url.rstrip("/")
 
-        if not merchant_id:
-            return request.make_response("<h3>Chưa cấu hình Merchant ID</h3>")
-        if not secret_key:
-            return request.make_response("<h3>Chưa cấu hình Secret Key</h3>")
+        if not merchant_id or not secret_key:
+            return request.make_response("<h3>Chưa cấu hình Merchant ID hoặc Secret Key</h3>")
 
         amount_to_pay = payment.debt_amount if payment.debt_amount > 0 else payment.amount_due
         amount_str = str(int(amount_to_pay or 0))
@@ -62,20 +44,23 @@ class SePayController(http.Controller):
         customer_id_str = str(payment.id)
         order_desc = f"Thanhtoan_{code_name}".strip()
 
+        # URL gửi sang SePay
+        success_redirect_url = f"{base_url}/payment/sepay_success/{payment.id}"
+
         payload = {
             "merchant": merchant_id,
             "operation": "PURCHASE",
-            "payment_method": "BANK_TRANSFER",
             "currency": "VND",
             "order_amount": amount_str,
             "order_invoice_number": order_number,
             "order_description": order_desc,
             "customer_id": customer_id_str,
-            "success_url": f"{base_url}/payment/sepay_success?invoice={code_name}&payment_id={payment.id}",
+            "success_url": success_redirect_url,
             "error_url": f"{base_url}/payment/sepay_error",
             "cancel_url": f"{base_url}/payment/sepay_cancel",
         }
 
+        # Sắp xếp đúng theo Alphabet cho chữ ký HMAC
         sign_string = ",".join([
             f"cancel_url={base_url}/payment/sepay_cancel",
             f"currency=VND",
@@ -86,8 +71,7 @@ class SePayController(http.Controller):
             f"order_amount={amount_str}",
             f"order_description={order_desc}",
             f"order_invoice_number={order_number}",
-            f"payment_method=BANK_TRANSFER",
-            f"success_url={base_url}/payment/sepay_success?invoice={code_name}&payment_id={payment.id}",
+            f"success_url={success_redirect_url}",
         ])
 
         raw_hmac = hmac.new(
@@ -100,18 +84,23 @@ class SePayController(http.Controller):
         payload["signature"] = signature
 
         return request.render(
-            "XALA_ECO_ODOO.sepay_redirect",
+            "xala_eco.sepay_redirect",
             {
                 "action": "https://pay-sandbox.sepay.vn/v1/checkout/init",
                 "payload": payload,
             },
         )
-
-    @http.route("/payment/sepay_success", type="http", auth="public", csrf=False)
-    def sepay_success(self, **kwargs):
+    # FIX ĐIỂM 1: ĐƯA CẢ 2 ROUTE VÀO ĐỂ DÙNG TRUYỀN ID THEO PATH HAY QUERY ĐỀU BẮT ĐƯỢC
+    @http.route([
+        "/payment/sepay_success", 
+        "/payment/sepay_success/<int:payment_id>"
+    ], type="http", auth="public", csrf=False)
+    def sepay_success(self, payment_id=None, **kwargs):
         """Cập nhật gạch nợ ngay khi khách nhảy vào trang Success"""
         invoice = kwargs.get('invoice') or kwargs.get('order_invoice_number') or ''
-        payment_id_param = kwargs.get('payment_id')
+        
+        # Ưu tiên lấy payment_id từ Path (/134110), nếu không có mới lấy trong kwargs
+        payment_id_param = payment_id or kwargs.get('payment_id')
 
         payment = False
 
@@ -135,13 +124,17 @@ class SePayController(http.Controller):
                 print("Lỗi cập nhật Success Redirect:", e)
 
         html = """
+        <!DOCTYPE html>
         <html>
-            <head><meta charset="utf-8"/><title>Kết quả thanh toán</title></head>
+            <head>
+                <meta charset="utf-8"/>
+                <title>Kết quả thanh toán</title>
+            </head>
             <body style="font-family: sans-serif; text-align:center; padding-top: 80px;">
                 <h1 style="color: green;">Thanh toán thành công!</h1>
                 <p>Cảm ơn bạn đã thực hiện thanh toán. Hệ thống đã ghi nhận thành công.</p>
                 <br/>
-                <a href="/odoo/action-156" 
+                <a href="/odoo" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo
@@ -149,10 +142,13 @@ class SePayController(http.Controller):
             </body>
         </html>
         """
-        return request.make_response(html, headers=[
-            ('Content-Type', 'text/html'),
-            ('ngrok-skip-browser-warning', 'true'),
-        ])
+        return request.make_response(
+            html.encode('utf-8'), 
+            headers=[
+                ('Content-Type', 'text/html; charset=utf-8'),
+                ('ngrok-skip-browser-warning', 'true')
+            ]
+        )
 
     @http.route("/payment/sepay_error", type="http", auth="public", csrf=False)
     def sepay_error(self, **kwargs):
@@ -162,7 +158,7 @@ class SePayController(http.Controller):
             <body style="font-family: sans-serif; text-align:center; padding-top: 80px;">
                 <h1 style="color: red;">Thanh toán thất bại hoặc lỗi chữ ký.</h1>
                 <br/>
-                <a href="/odoo/action-156" 
+                <a href="/odoo" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo
@@ -180,7 +176,7 @@ class SePayController(http.Controller):
             <body style="font-family: sans-serif; text-align:center; padding-top: 80px;">
                 <h1 style="color: #ff9f43;">Giao dịch đã bị hủy.</h1>
                 <br/>
-                <a href="/odoo/action-156" 
+                <a href="/odoo" 
                    style="background-color: #875A7B; color: white; padding: 12px 24px; 
                           text-decoration: none; border-radius: 6px; font-size: 16px;">
                     Quay lại Odoo
