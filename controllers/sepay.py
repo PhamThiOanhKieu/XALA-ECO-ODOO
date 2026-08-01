@@ -84,7 +84,7 @@ class SePayController(http.Controller):
         payload["signature"] = signature
 
         return request.render(
-            "xala_eco.sepay_redirect",
+            "xalaeco_management.sepay_redirect",
             {
                 "action": "https://pay-sandbox.sepay.vn/v1/checkout/init",
                 "payload": payload,
